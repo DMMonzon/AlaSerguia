@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: '29LT Riwaya Informal';
+  src: url('/fonts/29LT-Riwaya-Informal.woff2') format('woff2'),
+       url('/fonts/29LT-Riwaya-Informal.woff') format('woff'),
+       url('/fonts/29LT-Riwaya-Informal.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: '29LT Riwaya Informal';
+  src: url('/fonts/29LT-Riwaya-Informal-Bold.woff2') format('woff2'),
+       url('/fonts/29LT-Riwaya-Informal-Bold.woff') format('woff'),
+       url('/fonts/29LT-Riwaya-Informal.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    --font-serif: '29LT Riwaya Informal', serif;
+    --font-display: 'Simonetta', serif;
+  }
+
+  body, button, input, select, textarea, .font-serif, .font-handwriting {
+    font-family: var(--font-serif);
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-title, .font-cinzel, .font-display {
+    font-family: var(--font-display);
+  }
+}
+
+/* Parchment texture paper background class */
+.bg-parchment {
+  background-color: #FAF5EF;
+  background-image: 
+    radial-gradient(#E8DCCD 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(244, 235, 225, 0.4), rgba(250, 245, 239, 0.9));
+  background-size: 24px 24px, 100% 100%;
+}
+
+.bg-parchment-warm {
+  background-color: #F4EBE1;
+  background-image: radial-gradient(rgba(180, 150, 120, 0.08) 1px, transparent 0);
+  background-size: 20px 20px;
+}
+
+/* Book page shadow effect */
+.book-spine-shadow {
+  box-shadow: inset 15px 0 25px -10px rgba(80, 60, 40, 0.15), inset -15px 0 25px -10px rgba(80, 60, 40, 0.15);
+}
+
+.book-shadow {
+  box-shadow: 0 15px 35px -5px rgba(60, 45, 35, 0.12), 0 5px 15px rgba(0, 0, 0, 0.04);
+}
+
+.book-edge {
+  box-shadow: -4px 0 0 #E2CEB8, -8px 0 0 #D8C0A8, -12px 0 0 #CEB49A;
+}
+
+/* Page Transition Keyframes & Utility Classes */
+@keyframes pageFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: pageFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Custom Scrollbar for book reading */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F4EBE1;
+}
+::-webkit-scrollbar-thumb {
+  background: #CDB7A0;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #A88F76;
+}
+
+

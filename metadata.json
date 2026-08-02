@@ -1,0 +1,6 @@
+{
+  "name": "AlaSerguía",
+  "description": "Plataforma holística, editorial y comunitaria. Guías, e-books, sesiones de tarot y reiki, cartas comunitarias y portales de luz.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
