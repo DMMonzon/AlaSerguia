@@ -1,7 +1,7 @@
 import React from 'react';
 import { PageView } from '../../types';
 import { ArrowRight } from 'lucide-react';
-import logoImg from '../../assets/img/Logo.jpeg';
+import logoImg from '../../../assets/img/Logo.jpeg';
 
 interface AboutViewProps {
   setCurrentPage: (page: PageView) => void;
