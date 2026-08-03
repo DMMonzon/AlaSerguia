@@ -2,9 +2,7 @@
 
 @font-face {
   font-family: '29LT Riwaya Informal';
-  src: url('/fonts/29LT-Riwaya-Informal.woff2') format('woff2'),
-       url('/fonts/29LT-Riwaya-Informal.woff') format('woff'),
-       url('/fonts/29LT-Riwaya-Informal.ttf') format('truetype');
+  src: url('/fonts/29LT-Riwaya-Informal.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -12,9 +10,7 @@
 
 @font-face {
   font-family: '29LT Riwaya Informal';
-  src: url('/fonts/29LT-Riwaya-Informal-Bold.woff2') format('woff2'),
-       url('/fonts/29LT-Riwaya-Informal-Bold.woff') format('woff'),
-       url('/fonts/29LT-Riwaya-Informal.ttf') format('truetype');
+  src: url('/fonts/29LT-Riwaya-Informal.ttf') format('truetype');
   font-weight: bold;
   font-style: normal;
   font-display: swap;
@@ -26,11 +22,25 @@
     --font-display: 'Simonetta', serif;
   }
 
-  body, button, input, select, textarea, .font-serif, .font-handwriting {
+  body,
+  button,
+  input,
+  select,
+  textarea,
+  .font-serif,
+  .font-handwriting {
     font-family: var(--font-serif);
   }
 
-  h1, h2, h3, h4, h5, h6, .font-title, .font-cinzel, .font-display {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .font-title,
+  .font-cinzel,
+  .font-display {
     font-family: var(--font-display);
   }
 }
@@ -38,7 +48,7 @@
 /* Parchment texture paper background class */
 .bg-parchment {
   background-color: #FAF5EF;
-  background-image: 
+  background-image:
     radial-gradient(#E8DCCD 1px, transparent 1px),
     linear-gradient(to bottom, rgba(244, 235, 225, 0.4), rgba(250, 245, 239, 0.9));
   background-size: 24px 24px, 100% 100%;
@@ -68,6 +78,7 @@
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
@@ -82,15 +93,16 @@
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: #F4EBE1;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #CDB7A0;
   border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #A88F76;
 }
-
-
