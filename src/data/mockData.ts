@@ -1,8 +1,11 @@
 import { Product, Portal, SessionService, Letter, Article, User, NewsletterSubscriber } from '../types';
-import portal1Img from '../../assets/img/Portal1_Home.jpeg';
-import portal2Img from '../../assets/img/Portal2_Home.jpeg';
-import portal3Img from '../../assets/img/Portal3_Home.jpeg';
-import portal4Img from '../../assets/img/Portal4_Home.jpeg';
+import portal1Img from '../../assets/img/Portal1_libro.jpeg';
+import portal2Img from '../../assets/img/Portal2_libro.jpeg';
+import portal3Img from '../../assets/img/Portal3_libro.jpeg';
+import portal4Img from '../../assets/img/Portal4_libro.jpeg';
+import tarotImg from '../../assets/img/Tarot.jpeg';
+import reikiImg from '../../assets/img/Reiki.jpeg';
+import registrosImg from '../../assets/img/Registros.jpeg';
 
 export const INITIAL_PRODUCTS: Product[] = [
   {
@@ -15,6 +18,12 @@ export const INITIAL_PRODUCTS: Product[] = [
     pagesCount: 84,
     badge: 'MÁS VENDIDO',
     downloadUrl: '#download-tu-energia-y-consciencia.pdf',
+    previewImages: [
+      'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=800'
+    ],
     previewPages: [
       {
         pageNumber: 1,
@@ -43,6 +52,11 @@ export const INITIAL_PRODUCTS: Product[] = [
     pagesCount: 42,
     badge: 'RECOMENDADO',
     downloadUrl: '#download-limpieza-energetica.pdf',
+    previewImages: [
+      'https://images.unsplash.com/photo-1602928321679-560bb453f190?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1507652313519-d4e9174996dd?auto=format&fit=crop&q=80&w=800'
+    ],
     previewPages: [
       {
         pageNumber: 1,
@@ -66,6 +80,11 @@ export const INITIAL_PRODUCTS: Product[] = [
     pagesCount: 33,
     badge: 'EDICIÓN ESPECIAL',
     downloadUrl: '#download-oraculo-animales.pdf',
+    previewImages: [
+      'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1470115636492-6d2b56f9146d?auto=format&fit=crop&q=80&w=800'
+    ],
     previewPages: [
       {
         pageNumber: 1,
@@ -88,6 +107,11 @@ export const INITIAL_PRODUCTS: Product[] = [
     coverImage: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&q=80&w=600',
     pagesCount: 40,
     downloadUrl: '#download-set-mi-luz-interior.pdf',
+    previewImages: [
+      'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1490730141103-6cac27aaab94?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&q=80&w=800'
+    ],
     previewPages: [
       {
         pageNumber: 1,
@@ -106,6 +130,11 @@ export const INITIAL_PRODUCTS: Product[] = [
     pagesCount: 52,
     badge: 'INFANTIL Y FAMILIA',
     downloadUrl: '#download-sofia-y-kael.pdf',
+    previewImages: [
+      'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&q=80&w=800'
+    ],
     previewPages: [
       {
         pageNumber: 1,
@@ -215,7 +244,7 @@ export const SESSIONS_DATA: SessionService[] = [
     duration: '60 a 75 minutos',
     modality: 'Online (Videollamada)',
     icon: 'Sparkles',
-    illustration: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=600',
+    illustration: tarotImg,
     benefits: [
       'Claridad en momentos de duda o toma de decisiones',
       'Comprensión profunda de patrones emocionales',
@@ -232,7 +261,7 @@ export const SESSIONS_DATA: SessionService[] = [
     duration: '60 minutos',
     modality: 'Online / A distancia',
     icon: 'Sun',
-    illustration: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=600',
+    illustration: reikiImg,
     benefits: [
       'Alivio del estrés físico y la sobrecarga mental',
       'Desbloqueo suave de centros energéticos (Chakras)',
@@ -249,7 +278,7 @@ export const SESSIONS_DATA: SessionService[] = [
     duration: '60 a 75 minutos',
     modality: 'Online (Videollamada)',
     icon: 'Key',
-    illustration: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&q=80&w=600',
+    illustration: registrosImg,
     benefits: [
       'Respuestas sobre el origen de bloqueos recurrentes',
       'Comprensión del sentido de tus relaciones importantes',

@@ -125,7 +125,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 onClick={handleQuickAdminLogin}
                 className="px-3 py-1.5 rounded-lg bg-[#8B5A2B] text-white text-[11px] font-bold hover:bg-[#6A4320]"
               >
-                Entrar como Admin
+                ENTRAR COMO ADMIN
               </button>
             </div>
 
@@ -200,9 +200,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl bg-[#8B5A2B] text-white text-xs font-bold tracking-wider hover:bg-[#6A4320] shadow-md transition-all"
+              className="w-full py-2.5 rounded-xl bg-[#8B5A2B] text-white text-xs font-bold tracking-wider hover:bg-[#6A4320] shadow-md transition-all cursor-pointer"
             >
-              {isRegister ? 'Crear Mi Cuenta' : 'Ingresar'}
+              {isRegister ? 'CREAR MI CUENTA' : 'INGRESAR'}
             </button>
 
             <div className="text-center pt-2 border-t border-[#E2D5C5]">

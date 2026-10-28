@@ -1,37 +1,92 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Letter } from '../../types';
-import { Heart, Send, Sparkles, Feather, ShieldCheck, Mail, CheckCircle2, MessageCircle } from 'lucide-react';
+import {
+  Heart,
+  Sparkles,
+  Feather,
+  Lock,
+  Star,
+  Compass,
+  Flower2,
+} from 'lucide-react';
+import correoHeroImg from '../../../assets/img/CorreoHero.jpeg';
 
 interface LettersViewProps {
-  letters: Letter[];
+  letters?: Letter[];
   onAddLetter: (letter: Letter) => void;
-  onLikeLetter: (letterId: string) => void;
+  onLikeLetter?: (letterId: string) => void;
 }
 
+// Disparadores iniciales e inspiradores según cada motivo de la carta
+const CATEGORY_PROMPTS: Record<string, string> = {
+  'Necesito desahogarme': 'Hoy necesito hacer espacio en mi pecho para decir que...',
+  'Quiero agradecer': 'Hoy me tomo una pausa para agradecer de corazón por...',
+  'Busco una opinión o consejo': 'Me encuentro en una encrucijada y me gustaría recibir una mirada sincera sobre...',
+  'Estoy atravesando un cambio': 'Siento que una etapa se está transformando en mi vida y se trata de...',
+  'Solo quería compartir algo lindo': 'En este grato espacio quiero aprovechar para contarte que...',
+  'Prefiero escribir libremente': 'Hoy quiero decir que...',
+};
+
+const DEFAULT_PROMPT = 'Hoy quiero decir que...';
+
 export const LettersView: React.FC<LettersViewProps> = ({
-  letters,
   onAddLetter,
-  onLikeLetter,
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'write' | 'mailbox'>('write');
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const blurProgress = Math.min(1, Math.max(0, scrollY / 700));
+  const currentBlur = (blurProgress * 12).toFixed(1);
+  const currentScale = (1 + blurProgress * 0.05).toFixed(3);
+  const currentBrightness = (1 - blurProgress * 0.12).toFixed(2);
+  const currentOverlayOpacity = (blurProgress * 0.18).toFixed(2);
 
   // Letter Form State
   const [selectedCategory, setSelectedCategory] = useState<string>('Necesito desahogarme');
   const [content, setContent] = useState<string>('');
-  const [responseChoice, setResponseChoice] = useState<'respond' | 'no-respond'>('respond');
+  const [wantsResponse, setWantsResponse] = useState<boolean>(true);
   const [canShare, setCanShare] = useState<boolean>(true);
-  const [authorName, setAuthorName] = useState<string>('');
-  const [authorEmail, setAuthorEmail] = useState<string>('');
-  const [subject, setSubject] = useState<string>('');
   const [submitted, setSubmitted] = useState<boolean>(false);
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleSelectCategory = (categoryLabel: string) => {
+    setSelectedCategory(categoryLabel);
+    const prompt = CATEGORY_PROMPTS[categoryLabel] || DEFAULT_PROMPT;
+
+    const isUntouched =
+      !content.trim() ||
+      Object.values(CATEGORY_PROMPTS).some(
+        (p) => content.trim() === p.trim() || content.trim() === p.trim().replace(/\.+$/, '')
+      );
+
+    if (isUntouched) {
+      const newContent = `${prompt} `;
+      setContent(newContent);
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+          textareaRef.current.setSelectionRange(newContent.length, newContent.length);
+        }
+      }, 0);
+    } else {
+      textareaRef.current?.focus();
+    }
+  };
+
   const categories = [
-    { label: 'Necesito desahogarme', icon: '❤️' },
-    { label: 'Quiero agradecer', icon: '🌸' },
-    { label: 'Busco una opinión o consejo', icon: '⭐' },
-    { label: 'Estoy atravesando un cambio', icon: '🍃' },
-    { label: 'Solo quería compartir algo lindo', icon: '🌺' },
-    { label: 'Prefiero escribir libremente', icon: '🪶' },
+    { label: 'Necesito desahogarme', icon: Heart, color: 'text-[#8B5A7A]' },
+    { label: 'Quiero agradecer', icon: Sparkles, color: 'text-[#B88B6A]' },
+    { label: 'Busco una opinión o consejo', icon: Star, color: 'text-[#C4975A]' },
+    { label: 'Estoy atravesando un cambio', icon: Compass, color: 'text-[#8B7E6B]' },
+    { label: 'Solo quería compartir algo lindo', icon: Flower2, color: 'text-[#A07085]' },
+    { label: 'Prefiero escribir libremente', icon: Feather, color: 'text-[#7D6B58]' },
   ];
 
   const handleSubmitLetter = (e: React.FormEvent) => {
@@ -42,11 +97,11 @@ export const LettersView: React.FC<LettersViewProps> = ({
       id: `let-${Date.now()}`,
       category: selectedCategory,
       content,
-      wantsResponse: responseChoice === 'respond',
+      wantsResponse: wantsResponse,
       canShareAnonymously: canShare,
-      authorName: authorName || 'Anónimo',
-      authorEmail,
-      subject,
+      authorName: 'Anónimo',
+      authorEmail: '',
+      subject: '',
       createdAt: 'Hoy',
       heartsCount: 1,
       replies: [],
@@ -58,310 +113,388 @@ export const LettersView: React.FC<LettersViewProps> = ({
 
   const resetForm = () => {
     setContent('');
-    setAuthorName('');
-    setAuthorEmail('');
-    setSubject('');
+    setSelectedCategory('Necesito desahogarme');
+    setWantsResponse(true);
+    setCanShare(true);
     setSubmitted(false);
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 py-10 animate-fadeIn">
-
-      {/* HEADER SWITCH TABS */}
-      <div className="text-center space-y-4 max-w-2xl mx-auto">
-        <p className="text-xs font-cinzel text-[#8B5A2B] uppercase tracking-widest flex items-center justify-center gap-1">
-          <span>♡</span> BUZÓN DE ALASERGUÍA <span>♡</span>
-        </p>
-        <h1 className="font-serif text-4xl sm:text-5xl text-[#382D2B] font-bold">
-          Cartas para AlaSerguía
-        </h1>
-        <div className="w-16 h-0.5 bg-[#C8B29B] mx-auto" />
-
-        {/* Subtab Toggle: Escribir Carta vs Buzón Comunitario */}
-        <div className="inline-flex rounded-full border-2 border-[#D8C5B0] bg-[#FAF5EF] p-1 text-xs">
-          <button
-            onClick={() => setActiveSubTab('write')}
-            className={`px-6 py-2 rounded-full font-bold transition-all ${activeSubTab === 'write'
-              ? 'bg-[#8B5A2B] text-white shadow-xs'
-              : 'text-[#5C4D4B] hover:bg-[#EAE0D3]'
-              }`}
-          >
-            ✍️ Escribir tu carta
-          </button>
-          <button
-            onClick={() => setActiveSubTab('mailbox')}
-            className={`px-6 py-2 rounded-full font-bold transition-all ${activeSubTab === 'mailbox'
-              ? 'bg-[#8B5A2B] text-white shadow-xs'
-              : 'text-[#5C4D4B] hover:bg-[#EAE0D3]'
-              }`}
-          >
-            📬 Buzón Comunitario ({letters.filter((l) => l.canShareAnonymously).length})
-          </button>
-        </div>
+    <div className="relative">
+      {/* CAPA DE FONDO ESTÁTICA CON BLUR GRADUAL Y LENTO EN SCROLL */}
+      <div className="fixed inset-0 w-full h-[100dvh] pointer-events-none z-0 overflow-hidden">
+        <img
+          src={correoHeroImg}
+          alt="Escribí tu carta"
+          className="w-full h-full object-cover object-center will-change-transform"
+          style={{
+            filter: `blur(${currentBlur}px) brightness(${currentBrightness})`,
+            transform: `scale(${currentScale})`,
+            transition: 'filter 0.15s ease-out, transform 0.15s ease-out'
+          }}
+        />
+        <div
+          className="absolute inset-0 bg-black pointer-events-none transition-opacity duration-150"
+          style={{ opacity: Number(currentOverlayOpacity) }}
+        />
       </div>
 
-      {/* SUBTAB 1: ESCRIBIR TU CARTA */}
-      {activeSubTab === 'write' && (
-        <div className="space-y-8 animate-fadeIn">
-
-          {submitted ? (
-            <div className="max-w-2xl mx-auto bg-[#FAF5EF] rounded-3xl border-2 border-[#E2D5C5] p-8 text-center space-y-4 book-shadow">
-              <div className="w-16 h-16 mx-auto rounded-full bg-[#EAE0D3] text-[#8B5A2B] flex items-center justify-center">
-                <CheckCircle2 className="w-10 h-10 text-[#4A7C59]" />
+      {/* SECCIÓN HERO CON RECUADRO ESMERILADO A LA IZQUIERDA (GLASS CARD) */}
+      <section className="relative w-full min-h-[100dvh] flex flex-col justify-start pt-24 sm:pt-28 lg:pt-32 pb-12 sm:pb-20 px-4 sm:px-6 lg:px-8 bg-transparent z-10">
+        <div className="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
+          <div className="lg:col-span-6 z-10 animate-fadeIn">
+            <div className="p-6 sm:p-8 rounded-2xl bg-[#FAF5EF]/85 backdrop-blur-md border-2 border-[#8B5A2B]/35 shadow-xl space-y-6 text-center lg:text-left">
+              {/* Volanta/Badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#EAE0D3]/80 border border-[#C8B29B] text-xs font-cinzel text-[#8B5A2B] tracking-[0.2em] uppercase font-bold shadow-xs backdrop-blur-xs">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>» Buzón del Alma «</span>
               </div>
 
-              <h3 className="font-serif text-3xl font-bold text-[#382D2B]">
-                Gracias por confiarme estas palabras. ♡
-              </h3>
+              {/* Main Title */}
+              <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#1E120A] font-bold leading-tight tracking-wide drop-shadow-xs">
+                Escribí tu carta ♡
+              </h1>
 
-              <p className="font-serif text-sm text-[#6A5A4D] leading-relaxed italic max-w-md mx-auto">
-                Tu carta ya encontró un lugar donde llegar. La leeré con el tiempo y la atención que merece. Gracias por permitir que este espacio sea parte de tu camino.
+              {/* Floating Heart & Fine Divider Ornament */}
+              <div className="flex items-center justify-center lg:justify-start gap-3 text-[#B35A5A]">
+                <span className="h-[1px] w-12 bg-[#8B5A2B]/60" />
+                <span className="text-sm font-bold leading-none select-none">♡</span>
+                <span className="h-[1px] w-12 bg-[#8B5A2B]/60" />
+              </div>
+
+              {/* Descriptive Text */}
+              <p className="font-serif text-base sm:text-lg text-[#2B1D11] leading-relaxed italic font-medium drop-shadow-xs">
+                Este es tu espacio. Escribí con libertad. Dejá tus palabras, tus preguntas o aquello que tu corazón necesita soltar y confiar hoy.
               </p>
-
-              <div className="pt-4 flex justify-center gap-3">
-                <button
-                  onClick={resetForm}
-                  className="px-6 py-2.5 rounded-full bg-[#8B5A2B] text-white text-xs font-bold hover:bg-[#6A4320]"
-                >
-                  Escribir otra carta
-                </button>
-                <button
-                  onClick={() => setActiveSubTab('mailbox')}
-                  className="px-6 py-2.5 rounded-full border border-[#D8C5B0] text-[#382D2B] text-xs font-bold hover:bg-[#EAE0D3]"
-                >
-                  Ver Buzón Comunitario
-                </button>
-              </div>
             </div>
-          ) : (
-            <form onSubmit={handleSubmitLetter} className="space-y-8">
+          </div>
+        </div>
+      </section>
 
-              {/* Main Writing Area Spread */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      {/* DEFINICIÓN DEL FILTRO SVG DE BORDE RESQUEBRAJADO ORGÁNICO */}
+      <svg className="hidden" width="0" height="0" aria-hidden="true">
+        <defs>
+          <filter id="ragged-parchment-edge" x="-5%" y="-5%" width="110%" height="110%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.045 0.045" numOctaves="5" seed="12" result="roughNoise" />
+            <feDisplacementMap in="SourceGraphic" in2="roughNoise" scale="18" xChannelSelector="R" yChannelSelector="G" result="tornShape" />
+          </filter>
+          <filter id="ragged-sheet-edge" x="-5%" y="-5%" width="110%" height="110%">
+            <feTurbulence type="fractalNoise" baseFrequency="0.048 0.048" numOctaves="5" seed="24" result="sheetNoise" />
+            <feDisplacementMap in="SourceGraphic" in2="sheetNoise" scale="14" xChannelSelector="R" yChannelSelector="G" result="sheetTorn" />
+          </filter>
+        </defs>
+      </svg>
 
-                {/* Left Options Panel */}
-                <div className="lg:col-span-4 bg-[#FAF5EF] rounded-3xl border-2 border-[#E2D5C5] p-6 space-y-4 book-shadow">
-                  <h3 className="font-serif text-lg font-bold text-[#382D2B] border-b border-[#EFE5D9] pb-2">
-                    ¿Qué te gustaría compartir hoy?
-                  </h3>
+      {/* ENVOLVENTE CON SEPARACIÓN LATERAL DEL PAPIRO */}
+      <div className="relative z-20 px-3 sm:px-6 md:px-10 lg:px-14 pt-8 pb-20">
+        <div className="relative max-w-7xl mx-auto pt-16 pb-20 space-y-12">
 
-                  <div className="space-y-2">
-                    {categories.map((cat) => (
-                      <button
-                        key={cat.label}
-                        type="button"
-                        onClick={() => setSelectedCategory(cat.label)}
-                        className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs transition-all flex items-center gap-2 ${selectedCategory === cat.label
-                          ? 'bg-[#8B5A2B] text-white font-bold shadow-xs'
-                          : 'bg-[#F4EBE1] text-[#5C4D4B] hover:bg-[#EAE0D3]'
-                          }`}
-                      >
-                        <span>{cat.icon}</span>
-                        <span>{cat.label}</span>
-                      </button>
-                    ))}
-                  </div>
+          {/* LÁMINA ÚNICA DE PAPIRO RESQUEBRAJADO (SIN COSTURAS) */}
+          <div
+            className="absolute inset-1 sm:inset-2 z-0 pointer-events-none overflow-visible"
+            style={{
+              filter: 'drop-shadow(0 18px 28px rgba(25, 12, 5, 0.45)) drop-shadow(0 4px 10px rgba(25, 12, 5, 0.25))'
+            }}
+          >
+            <div
+              className="w-full h-full bg-[#EFE3D3] relative overflow-hidden"
+              style={{ filter: 'url(#ragged-parchment-edge)' }}
+            >
+              <div
+                className="absolute inset-0"
+                style={{
+                  boxShadow: 'inset 0 0 65px 18px rgba(120, 72, 28, 0.28), inset 0 0 18px 4px rgba(90, 50, 15, 0.22)'
+                }}
+              />
+              <svg className="absolute inset-0 w-full h-full opacity-40 mix-blend-multiply">
+                <filter id="parchment-grain">
+                  <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="4" stitchTiles="stitch" />
+                  <feColorMatrix type="matrix" values="0 0 0 0 0.52   0 0 0 0 0.33   0 0 0 0 0.16  0 0 0 0.45 0" />
+                </filter>
+                <rect width="100%" height="100%" filter="url(#parchment-grain)" />
+              </svg>
+            </div>
+          </div>
 
-                  <div className="p-3 rounded-xl bg-[#F4EBE1] border border-[#E2D5C5] text-xs text-[#7A6B5D] font-serif italic text-center space-y-1">
-                    <p className="font-bold text-[#382D2B] not-italic">Recordatorio amoroso:</p>
-                    <p>No hay palabras correctas para escribir una carta. Solo lo que necesitás expresar hoy.</p>
-                  </div>
-                </div>
-
-                {/* Center Parchment Letter Body */}
-                <div className="lg:col-span-8 bg-parchment rounded-3xl border-4 border-[#C8B29B] p-6 sm:p-10 space-y-4 book-shadow relative">
-
-                  <div className="border-b border-[#E2D5C5] pb-3 flex items-center justify-between">
-                    <span className="font-handwriting text-2xl text-[#382D2B]">
-                      Querida AlaSerguía...
-                    </span>
-                    <Feather className="w-5 h-5 text-[#8B5A2B]" />
-                  </div>
-
-                  <p className="text-xs text-[#7A6B5D] font-serif italic">
-                    Contás acá tu historia, lo que sentís, lo que necesitás compartir...
-                  </p>
-
-                  <textarea
-                    rows={12}
-                    required
-                    placeholder="Escribí aquí tus pensamientos libremente..."
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    className="w-full p-4 rounded-xl border border-[#D8C5B0] bg-[#FAF5EF]/90 text-sm font-serif text-[#382D2B] leading-relaxed focus:outline-hidden focus:ring-2 focus:ring-[#8B5A2B] resize-y"
+          {/* FORMULARIO DE CARTA DENTRO DEL PAPIRO */}
+          <section className="relative z-10 px-4 sm:px-6 lg:px-8">
+            {submitted ? (
+              <div className="max-w-2xl mx-auto bg-[#FAF5EF]/90 rounded-3xl border border-[#E2D7C5] p-8 sm:p-10 text-center space-y-6 shadow-md relative overflow-hidden">
+                <div className="w-28 h-28 mx-auto">
+                  <img
+                    src="/img/letters/vintage_mailbox_flowers.png"
+                    alt="Buzón"
+                    className="w-full h-full object-contain drop-shadow-xs"
                   />
-
-                  <div className="text-right text-[10px] text-[#A88F76] font-serif">
-                    {content.length} caracteres escritos
-                  </div>
                 </div>
 
-              </div>
-
-              {/* Bottom Preferences Section ("Antes de enviar tu carta...") */}
-              <div className="bg-[#FAF5EF] rounded-3xl border-2 border-[#E2D5C5] p-6 sm:p-8 space-y-6 book-shadow">
-
-                <h3 className="font-serif text-lg font-bold text-[#382D2B] border-b border-[#EFE5D9] pb-2">
-                  Antes de enviar tu carta...
-                </h3>
-
-                {/* Preference Choices */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-
-                  <div
-                    onClick={() => setResponseChoice('respond')}
-                    className={`p-4 rounded-2xl border cursor-pointer transition-all ${responseChoice === 'respond'
-                      ? 'bg-[#EAE0D3] border-[#8B5A2B] font-bold'
-                      : 'bg-[#F4EBE1] border-[#E2D5C5]'
-                      }`}
-                  >
-                    <p className="text-[#382D2B] font-bold">Me gustaría recibir una respuesta</p>
-                    <p className="text-[11px] text-[#7A6B5D] mt-1">Te responderé por correo cuando pueda.</p>
-                  </div>
-
-                  <div
-                    onClick={() => setResponseChoice('no-respond')}
-                    className={`p-4 rounded-2xl border cursor-pointer transition-all ${responseChoice === 'no-respond'
-                      ? 'bg-[#EAE0D3] border-[#8B5A2B] font-bold'
-                      : 'bg-[#F4EBE1] border-[#E2D5C5]'
-                      }`}
-                  >
-                    <p className="text-[#382D2B] font-bold">No hace falta responder</p>
-                    <p className="text-[11px] text-[#7A6B5D] mt-1">Solo necesito dejar estas palabras.</p>
-                  </div>
-
-                  <div
-                    onClick={() => setCanShare(!canShare)}
-                    className={`p-4 rounded-2xl border cursor-pointer transition-all ${canShare
-                      ? 'bg-[#EAE0D3] border-[#8B5A2B] font-bold'
-                      : 'bg-[#F4EBE1] border-[#E2D5C5]'
-                      }`}
-                  >
-                    <p className="text-[#382D2B] font-bold flex items-center gap-1">
-                      <input type="checkbox" checked={canShare} readOnly className="rounded text-[#8B5A2B]" />
-                      Autorizo compartir de forma anónima
-                    </p>
-                    <p className="text-[11px] text-[#7A6B5D] mt-1">Puede inspirar y acompañar a otras personas.</p>
-                  </div>
-
-                </div>
-
-                <div className="p-3 rounded-xl bg-[#F4EBE1] border border-[#E2D5C5] text-[11px] text-[#7A6B5D] flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-[#8B5A2B] flex-shrink-0" />
-                  <span>Tu identidad siempre estará protegida. Tu carta será leída con respeto, amor y confidencialidad.</span>
-                </div>
-
-                {/* Optional Contact Inputs */}
-                <div className="space-y-3 pt-2">
-                  <p className="text-xs font-bold text-[#382D2B] font-serif">
-                    Opcional: contanos cómo querés que te contactemos ♡
-                  </p>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <input
-                      type="text"
-                      placeholder="Tu nombre (opcional)"
-                      value={authorName}
-                      onChange={(e) => setAuthorName(e.target.value)}
-                      className="px-3.5 py-2 text-xs rounded-xl border border-[#D8C5B0] bg-[#FAF5EF]"
-                    />
-
-                    <input
-                      type="email"
-                      placeholder="Tu correo electrónico (opcional)"
-                      value={authorEmail}
-                      onChange={(e) => setAuthorEmail(e.target.value)}
-                      className="px-3.5 py-2 text-xs rounded-xl border border-[#D8C5B0] bg-[#FAF5EF]"
-                    />
-
-                    <input
-                      type="text"
-                      placeholder="Asunto de tu carta (opcional)"
-                      value={subject}
-                      onChange={(e) => setSubject(e.target.value)}
-                      className="px-3.5 py-2 text-xs rounded-xl border border-[#D8C5B0] bg-[#FAF5EF]"
-                    />
-                  </div>
-                </div>
-
-                {/* Submit button */}
-                <div className="pt-4 flex items-center justify-between">
-                  <p className="text-xs text-[#7A6B5D] font-serif italic">
+                <div className="space-y-2">
+                  <h3 className="font-serif text-2xl sm:text-3xl font-bold text-[#382D2B]">
                     Gracias por confiarme estas palabras. ♡
+                  </h3>
+                  <p className="font-serif text-sm sm:text-base text-[#6A5A4D] leading-relaxed italic max-w-md mx-auto">
+                    Tu carta ya encontró un lugar donde llegar. La leeré con el tiempo y la atención que merece. Gracias por permitir que este espacio sea parte de tu camino.
                   </p>
+                </div>
 
+                <div className="pt-4 flex justify-center">
                   <button
-                    type="submit"
-                    className="px-8 py-3 rounded-xl bg-[#8B5A2B] text-white text-xs font-bold tracking-wider hover:bg-[#6A4320] shadow-md transition-all flex items-center gap-2"
+                    onClick={resetForm}
+                    className="px-8 py-3 rounded-full bg-[#6D5D7A] hover:bg-[#584964] text-white text-xs font-serif font-bold tracking-wide shadow-sm transition-all cursor-pointer"
                   >
-                    <span>Confiar esta carta</span>
-                    <Send className="w-4 h-4" />
+                    ESCRIBIR OTRA CARTA
                   </button>
                 </div>
-
               </div>
+            ) : (
+              <form onSubmit={handleSubmitLetter} className="space-y-6 max-w-5xl mx-auto">
+                {/* 1. FILA SUPERIOR: COLUMNA IZQUIERDA Y HOJA DE CARTA EMPAREJADAS EN ALTURA */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                  
+                  {/* COLUMNA IZQUIERDA: TEMÁTICAS + OPCIONES CON TOGGLES */}
+                  <div className="lg:col-span-4 bg-[#FAF5EF]/90 rounded-2xl sm:rounded-3xl border border-[#EADBCE]/80 p-5 sm:p-6 space-y-5 shadow-xs flex flex-col justify-between">
+                    <div className="space-y-4">
+                      <div className="text-center sm:text-left space-y-1">
+                        <h3 className="font-serif text-base sm:text-lg font-bold text-[#382D2B]">
+                          ¿Qué te gustaría compartir hoy?
+                        </h3>
+                        <p className="text-[#8B6B88]/60 text-xs">♡</p>
+                      </div>
 
-            </form>
-          )}
-
-        </div>
-      )}
-
-      {/* SUBTAB 2: BUZÓN COMUNITARIO DE CARTAS */}
-      {activeSubTab === 'mailbox' && (
-        <div className="space-y-6 animate-fadeIn">
-          <div className="text-center space-y-1">
-            <h3 className="font-serif text-2xl font-bold text-[#382D2B]">
-              Reflexiones y Cartas Compartidas
-            </h3>
-            <p className="text-xs text-[#6A5A4D] font-serif">
-              Historias anónimas escritas por la comunidad para recordar que no estamos solos en el camino.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {letters
-              .filter((l) => l.canShareAnonymously)
-              .map((letter) => (
-                <div
-                  key={letter.id}
-                  className="bg-[#FAF5EF] rounded-2xl border-2 border-[#E2D5C5] p-6 space-y-4 shadow-sm hover:shadow-md transition-all book-shadow relative flex flex-col justify-between"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-xs text-[#8B5A2B] font-cinzel border-b border-[#EFE5D9] pb-2">
-                      <span className="font-bold">{letter.category}</span>
-                      <span>{letter.createdAt}</span>
+                      {/* Botones de motivo */}
+                      <div className="space-y-1.5">
+                        {categories.map((cat) => {
+                          const Icon = cat.icon;
+                          const isSelected = selectedCategory === cat.label;
+                          return (
+                            <button
+                              key={cat.label}
+                              type="button"
+                              onClick={() => handleSelectCategory(cat.label)}
+                              className={`w-full text-left px-4 py-2.5 sm:py-3 rounded-2xl text-xs transition-all flex items-center gap-3 border-none cursor-pointer ${
+                                isSelected
+                                  ? 'bg-[#EFE6F0]/90 text-[#4E3955] font-semibold shadow-xs ring-1 ring-[#D8C7D8]/80'
+                                  : 'bg-transparent hover:bg-[#F0E6D8]/70 text-[#5C4D4B]'
+                              }`}
+                            >
+                              <Icon
+                                className={`w-4 h-4 shrink-0 transition-transform ${
+                                  isSelected ? 'text-[#6D5D7A] scale-110' : cat.color
+                                }`}
+                              />
+                              <span className="font-serif text-[13px] leading-snug">
+                                {cat.label}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
 
-                    <p className="font-serif text-sm text-[#382D2B] leading-relaxed italic">
-                      &ldquo;{letter.content}&rdquo;
-                    </p>
+                    {/* Opciones con Toggle Buttons */}
+                    <div className="pt-4 border-t border-[#EADBCE] space-y-3">
+                      <div className="space-y-0.5">
+                        <h4 className="font-serif font-bold text-xs sm:text-sm text-[#382D2B] flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-[#8B6B88]" />
+                          Antes de enviar tu carta...
+                        </h4>
+                        <p className="text-[11px] text-[#7A6B5D] font-serif">
+                          Personalizá cómo querés que recibamos tus palabras.
+                        </p>
+                      </div>
 
-                    <p className="text-xs text-[#8B5A2B] font-bold text-right font-handwriting text-lg">
-                      — {letter.authorName || 'Lector/a Anónimo'}
-                    </p>
+                      <div className="space-y-2.5">
+                        {/* Elección 1: Me gustaría recibir una respuesta */}
+                        <div
+                          onClick={() => setWantsResponse((prev) => !prev)}
+                          className={`p-3 sm:p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer select-none ${
+                            wantsResponse
+                              ? 'bg-[#EFE6F0]/90 border-[#C9B5CA] shadow-2xs'
+                              : 'bg-[#F7F2EB]/70 border-[#EADBCE] hover:bg-[#F0E6D8]/60'
+                          }`}
+                        >
+                          <div className="space-y-0.5">
+                            <p className="font-serif text-xs font-bold text-[#382D2B] leading-snug">
+                              Me gustaría recibir una respuesta
+                            </p>
+                            <p className="text-[10px] text-[#7A6B5D] font-serif leading-snug">
+                              Te responderé por correo cuando pueda.
+                            </p>
+                          </div>
+
+                          {/* Toggle Switch */}
+                          <button
+                            type="button"
+                            role="switch"
+                            aria-checked={wantsResponse}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setWantsResponse((prev) => !prev);
+                            }}
+                            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                              wantsResponse ? 'bg-[#6D5D7A]' : 'bg-[#D8C7B8]'
+                            }`}
+                          >
+                            <span
+                              aria-hidden="true"
+                              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                                wantsResponse ? 'translate-x-5' : 'translate-x-0'
+                              }`}
+                            />
+                          </button>
+                        </div>
+
+                        {/* Elección 2: Deseo compartir mi historia */}
+                        <div
+                          onClick={() => setCanShare((prev) => !prev)}
+                          className={`p-3 sm:p-3.5 rounded-2xl border transition-all flex items-center justify-between gap-3 cursor-pointer select-none ${
+                            canShare
+                              ? 'bg-[#EFE6F0]/90 border-[#C9B5CA] shadow-2xs'
+                              : 'bg-[#F7F2EB]/70 border-[#EADBCE] hover:bg-[#F0E6D8]/60'
+                          }`}
+                        >
+                          <div className="space-y-0.5">
+                            <p className="font-serif text-xs font-bold text-[#382D2B] leading-snug">
+                              Deseo compartir mi historia
+                            </p>
+                            <p className="text-[10px] text-[#7A6B5D] font-serif leading-snug">
+                              Autorizo compartirla de forma anónima en la comunidad.
+                            </p>
+                          </div>
+
+                          {/* Toggle Switch */}
+                          <button
+                            type="button"
+                            role="switch"
+                            aria-checked={canShare}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCanShare((prev) => !prev);
+                            }}
+                            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                              canShare ? 'bg-[#6D5D7A]' : 'bg-[#D8C7B8]'
+                            }`}
+                          >
+                            <span
+                              aria-hidden="true"
+                              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                                canShare ? 'translate-x-5' : 'translate-x-0'
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Likes / Hug replies */}
-                  <div className="pt-3 border-t border-[#EFE5D9] flex items-center justify-between text-xs">
-                    <button
-                      onClick={() => onLikeLetter(letter.id)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F4EBE1] text-[#B35A5A] hover:bg-[#EAE0D3] font-bold transition-colors"
-                    >
-                      <Heart className="w-3.5 h-3.5 fill-current" />
-                      <span>{letter.heartsCount} Abrazos de luz</span>
-                    </button>
+                  {/* COLUMNA DERECHA: HOJA DE CARTA ANTIGUA (ALINEADA Y EMPAREJADA EN ALTURA) */}
+                  <div className="lg:col-span-8 flex flex-col h-full">
+                    <div className="relative p-6 sm:p-10 flex-1 min-h-[460px] sm:min-h-[500px] flex flex-col justify-between">
+                      {/* Lámina de fondo de la hoja con bordes irregulares desgastados estilo papel */}
+                      <div
+                        className="absolute inset-0 z-0 pointer-events-none overflow-visible"
+                        style={{
+                          filter: 'drop-shadow(0 14px 24px rgba(45, 25, 15, 0.22)) drop-shadow(0 2px 6px rgba(45, 25, 15, 0.12))'
+                        }}
+                      >
+                        <div
+                          className="w-full h-full bg-[#FAF5EE] border border-[#D8C7B5]/80 relative overflow-hidden"
+                          style={{ filter: 'url(#ragged-sheet-edge)' }}
+                        >
+                          {/* Suave sombra interna envejecida en los bordes de la hoja */}
+                          <div
+                            className="absolute inset-0"
+                            style={{
+                              boxShadow: 'inset 0 0 35px 8px rgba(160, 120, 80, 0.12), inset 0 0 10px 2px rgba(120, 80, 40, 0.08)'
+                            }}
+                          />
+                        </div>
+                      </div>
 
-                    <span className="text-[10px] text-[#A88F76] font-serif">
-                      Compartida amorosamente
-                    </span>
+                      {/* Marco interior fino de papelería vintage */}
+                      <div className="absolute inset-4 sm:inset-5 border border-[#E2D5C2]/60 rounded-xl pointer-events-none z-10" />
+
+                      {/* Encabezado Manuscrito */}
+                      <div className="space-y-1 relative z-10 mb-3">
+                        <h2 className="font-cursive text-3xl sm:text-4xl text-[#5D4B66] tracking-wide">
+                          Querida AlaSerguía...
+                        </h2>
+                        <div className="text-[#8B6B88]/60 text-xs pl-2">
+                          ♡
+                        </div>
+                      </div>
+
+                      {/* Textarea sin bordes nativos */}
+                      <div className="relative z-10 flex-1 flex flex-col">
+                        <textarea
+                          ref={textareaRef}
+                          rows={14}
+                          required
+                          value={content}
+                          onChange={(e) => setContent(e.target.value)}
+                          placeholder={CATEGORY_PROMPTS[selectedCategory] || DEFAULT_PROMPT}
+                          className="w-full flex-1 bg-transparent border-none outline-none focus:ring-0 text-[#3C2F2F] font-serif text-sm sm:text-base leading-relaxed placeholder:text-[#A89887]/80 resize-none pb-28 sm:pb-32"
+                        />
+                      </div>
+
+                      {/* Ramita botánica en la esquina */}
+                      <img
+                        src="/img/letters/lavender_corner_branch.png"
+                        alt=""
+                        className="absolute bottom-2 right-2 w-44 sm:w-60 max-w-[55%] pointer-events-none select-none z-10 opacity-80"
+                      />
+
+                      {/* Contador sutil */}
+                      <div className="relative z-10 text-[11px] text-[#A89887] font-serif pt-2 flex items-center justify-between">
+                        <span>{content.length > 0 ? `${content.length} caracteres escritos` : ''}</span>
+                        <span className="text-[10px] text-[#B8A695] italic font-serif">Buzón del Alma</span>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* 2. BLOQUE FINAL DE ENVÍO CON EL CTA "CONFIAR ESTA CARTA" ENSANCHADO A LO ANCHO TOTAL */}
+                <div className="w-full rounded-3xl bg-[#FAF5EF]/95 border-2 border-[#E2D5C5] p-5 sm:p-7 flex flex-col sm:flex-row items-center justify-between gap-5 sm:gap-8 shadow-sm">
+                  <div className="shrink-0 flex items-center justify-center">
+                    <img
+                      src="/img/letters/vintage_mailbox_flowers.png"
+                      alt="Buzón de cartas florecido"
+                      className="w-20 sm:w-28 h-20 sm:h-28 object-contain select-none pointer-events-none drop-shadow-xs"
+                    />
+                  </div>
+
+                  <div className="flex-1 text-center sm:text-left space-y-1.5 font-serif">
+                    <h4 className="text-base sm:text-lg font-bold text-[#382D2B]">
+                      Gracias por confiarme estas palabras. ♡
+                    </h4>
+                    <p className="text-xs sm:text-sm text-[#6A5A4D] leading-relaxed">
+                      Tu carta ya encontró un lugar donde llegar. La leeré con el tiempo y la atención que merece.
+                    </p>
+                    <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[11px] text-[#7A6B5D] pt-0.5">
+                      <Lock className="w-3.5 h-3.5 text-[#8B6B88] shrink-0" />
+                      <span>Tu identidad siempre estará protegida bajo confidencialidad.</span>
+                    </div>
+                  </div>
+
+                  <div className="shrink-0 flex flex-col items-center sm:items-end space-y-1.5">
+                    <button
+                      type="submit"
+                      className="px-9 py-3.5 rounded-full bg-[#6D5D7A] hover:bg-[#584964] text-white font-serif text-sm font-semibold tracking-wide shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center cursor-pointer"
+                    >
+                      CONFIAR ESTA CARTA
+                    </button>
+                    <p className="text-[10px] text-[#8B7868] font-serif">
+                      Tu carta será enviada de forma segura.
+                    </p>
                   </div>
                 </div>
-              ))}
-          </div>
-        </div>
-      )}
+              </form>
+            )}
+          </section>
 
+        </div>
+      </div>
     </div>
   );
 };

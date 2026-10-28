@@ -35,13 +35,16 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isPortalsDropdownOpen, setIsPortalsDropdownOpen] = useState(false);
+  const [isMailboxDropdownOpen, setIsMailboxDropdownOpen] = useState(false);
+  const [isMobilePortalsOpen, setIsMobilePortalsOpen] = useState(false);
+  const [isMobileMailboxOpen, setIsMobileMailboxOpen] = useState(false);
 
   const navItems: { id: PageView; label: string; hasDropdown?: boolean; badge?: string }[] = [
     { id: 'about', label: 'ALA SERGUÍA' },
     { id: 'portals', label: 'PORTALES', hasDropdown: true },
     { id: 'store', label: 'TIENDA' },
     { id: 'services', label: 'ACOMPAÑAMIENTO' },
-    { id: 'letters', label: 'BUZÓN', },
+    { id: 'letters', label: 'BUZÓN', hasDropdown: true },
     { id: 'contact', label: 'CONTACTO' },
   ];
 
@@ -57,20 +60,22 @@ export const Header: React.FC<HeaderProps> = ({
       onOpenPortalBookModal();
       setIsMobileMenuOpen(false);
       setIsPortalsDropdownOpen(false);
+      setIsMailboxDropdownOpen(false);
       return;
     }
     setCurrentPage(page);
     setIsMobileMenuOpen(false);
     setIsPortalsDropdownOpen(false);
+    setIsMailboxDropdownOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <header
       className={
-        currentPage === 'home' || currentPage === 'about'
-          ? "absolute top-0 left-0 right-0 z-40 bg-transparent transition-all"
-          : "sticky top-0 z-40 bg-[#FAF5EF]/95 backdrop-blur-md border-b border-[#E8DCCD] transition-all shadow-xs"
+        currentPage === 'admin'
+          ? "sticky top-0 z-50 bg-[#FAF5EF]/95 backdrop-blur-md border-b border-[#E8DCCD] transition-all shadow-xs"
+          : "absolute top-0 left-0 right-0 w-full z-50 bg-[#FAF5EF]/55 backdrop-blur-md border-b-2 border-[#8B5A2B]/35 shadow-xl transition-all"
       }
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
@@ -89,22 +94,21 @@ export const Header: React.FC<HeaderProps> = ({
 
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-serif text-xl sm:text-2xl font-bold tracking-wide text-[#382D2B]">
+                <span className="font-serif text-xl sm:text-2xl font-bold tracking-wide text-[#1E120A] drop-shadow-xs">
                   AlaSerguía
                 </span>
               </div>
-              <p className="text-[10px] tracking-widest text-[#3A2A1A] font-medium font-serif">
+              <p className="text-[10px] tracking-widest text-[#2B1D11] font-medium font-serif drop-shadow-xs">
                 Guías para hacer tu camino
               </p>
             </div>
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-7 text-xs font-medium tracking-widest text-[#3A2A1A]">
+          <nav className="hidden lg:flex items-center gap-7 text-xs font-semibold tracking-widest text-[#1E120A]">
             {navItems.map((item) => {
-              const isActive = currentPage === item.id;
-
-              if (item.hasDropdown) {
+              if (item.id === 'portals') {
+                const isActive = currentPage === 'portals' || currentPage === 'portal-detail';
                 return (
                   <div
                     key={item.id}
@@ -113,19 +117,22 @@ export const Header: React.FC<HeaderProps> = ({
                     onMouseLeave={() => setIsPortalsDropdownOpen(false)}
                   >
                     <button
-                      onClick={() => handleNavClick('portals')}
-                      className={`flex items-center gap-1 transition-colors cursor-pointer relative py-0.5 ${isActive ? 'text-[#8B5A2B] font-bold' : 'hover:text-[#8B5A2B]'
-                        }`}
+                      type="button"
+                      onClick={() => setIsPortalsDropdownOpen((prev) => !prev)}
+                      className={`flex items-center gap-1 transition-colors cursor-pointer relative py-0.5 drop-shadow-xs ${
+                        isActive ? 'text-[#8B5A2B] font-bold' : 'hover:text-[#8B5A2B]'
+                      }`}
                     >
                       <span>{item.label}</span>
-                      <ChevronDown className="w-3.5 h-3.5 opacity-70 transition-transform group-hover:rotate-180" />
+                      <ChevronDown className={`w-3.5 h-3.5 opacity-70 transition-transform ${isPortalsDropdownOpen ? 'rotate-180' : ''}`} />
 
                       {/* Mystical Active / Hover Link Indicator */}
                       <div
-                        className={`absolute -bottom-2.5 left-0 right-0 flex items-center justify-center gap-1 pointer-events-none transition-all duration-300 ${isActive
+                        className={`absolute -bottom-2.5 left-0 right-0 flex items-center justify-center gap-1 pointer-events-none transition-all duration-300 ${
+                          isActive
                             ? 'opacity-100 scale-100'
                             : 'opacity-0 scale-95 group-hover:opacity-60 group-hover:scale-100'
-                          }`}
+                        }`}
                       >
                         <span className="h-[1px] w-full bg-[#8B5A2B]/60" />
                         <span className="text-[10px] text-[#8B5A2B] font-bold leading-none select-none">♡</span>
@@ -148,7 +155,7 @@ export const Header: React.FC<HeaderProps> = ({
                                 setIsMobileMenuOpen(false);
                                 setIsPortalsDropdownOpen(false);
                               }}
-                              className="w-full text-left px-4 py-2.5 text-xs text-[#3A2A1A] hover:bg-[#F2E8DC] hover:text-[#8B5A2B] transition-colors flex items-center justify-between cursor-pointer"
+                              className="w-full text-left px-4 py-2.5 text-xs text-[#1E120A] hover:bg-[#F2E8DC] hover:text-[#8B5A2B] transition-colors flex items-center justify-between cursor-pointer"
                             >
                               <span>{p.name}</span>
                               <span className="text-[10px] text-[#A88F76]">→</span>
@@ -161,12 +168,89 @@ export const Header: React.FC<HeaderProps> = ({
                 );
               }
 
+              if (item.id === 'letters') {
+                const isActive = currentPage === 'letters' || currentPage === 'community-letters';
+                return (
+                  <div
+                    key={item.id}
+                    className="relative group py-1"
+                    onMouseEnter={() => setIsMailboxDropdownOpen(true)}
+                    onMouseLeave={() => setIsMailboxDropdownOpen(false)}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setIsMailboxDropdownOpen((prev) => !prev)}
+                      className={`flex items-center gap-1 transition-colors cursor-pointer relative py-0.5 drop-shadow-xs ${
+                        isActive ? 'text-[#8B5A2B] font-bold' : 'hover:text-[#8B5A2B]'
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      <ChevronDown className={`w-3.5 h-3.5 opacity-70 transition-transform ${isMailboxDropdownOpen ? 'rotate-180' : ''}`} />
+
+                      {/* Mystical Active / Hover Link Indicator */}
+                      <div
+                        className={`absolute -bottom-2.5 left-0 right-0 flex items-center justify-center gap-1 pointer-events-none transition-all duration-300 ${
+                          isActive
+                            ? 'opacity-100 scale-100'
+                            : 'opacity-0 scale-95 group-hover:opacity-60 group-hover:scale-100'
+                        }`}
+                      >
+                        <span className="h-[1px] w-full bg-[#8B5A2B]/60" />
+                        <span className="text-[10px] text-[#8B5A2B] font-bold leading-none select-none">♡</span>
+                        <span className="h-[1px] w-full bg-[#8B5A2B]/60" />
+                      </div>
+                    </button>
+
+                    {/* Buzón Dropdown Menu Wrapper with continuous hit box */}
+                    {isMailboxDropdownOpen && (
+                      <div className="absolute top-full left-0 pt-1.5 w-60 z-50">
+                        <div className="bg-[#FAF5EF] border border-[#E2D5C5] rounded-xl shadow-xl py-2 overflow-hidden animate-fadeIn">
+                          <div className="px-3 py-1.5 text-[10px] uppercase font-bold tracking-wider text-[#A88F76] border-b border-[#EFE5D9]">
+                            Buzón del Alma
+                          </div>
+                          <button
+                            onClick={() => {
+                              handleNavClick('letters');
+                              setIsMailboxDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2.5 text-xs transition-colors flex items-center justify-between cursor-pointer ${
+                              currentPage === 'letters'
+                                ? 'bg-[#F2E8DC] text-[#8B5A2B] font-semibold'
+                                : 'text-[#1E120A] hover:bg-[#F2E8DC] hover:text-[#8B5A2B]'
+                            }`}
+                          >
+                            <span>Escribir una carta</span>
+                            <span className="text-[10px] text-[#A88F76]">→</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleNavClick('community-letters');
+                              setIsMailboxDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2.5 text-xs transition-colors flex items-center justify-between cursor-pointer ${
+                              currentPage === 'community-letters'
+                                ? 'bg-[#F2E8DC] text-[#8B5A2B] font-semibold'
+                                : 'text-[#1E120A] hover:bg-[#F2E8DC] hover:text-[#8B5A2B]'
+                            }`}
+                          >
+                            <span>Leer nuestra comunidad</span>
+                            <span className="text-[10px] text-[#A88F76]">→</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              const isActive = currentPage === item.id;
               return (
                 <div key={item.id} className="relative group py-1">
                   <button
                     onClick={() => handleNavClick(item.id)}
-                    className={`transition-colors relative flex items-center gap-1 cursor-pointer py-0.5 ${isActive ? 'text-[#8B5A2B] font-bold' : 'hover:text-[#8B5A2B]'
-                      }`}
+                    className={`transition-colors relative flex items-center gap-1 cursor-pointer py-0.5 drop-shadow-xs ${
+                      isActive ? 'text-[#8B5A2B] font-bold' : 'hover:text-[#8B5A2B]'
+                    }`}
                   >
                     <span>{item.label}</span>
                     {item.badge && (
@@ -175,10 +259,11 @@ export const Header: React.FC<HeaderProps> = ({
 
                     {/* Mystical Active / Hover Link Indicator */}
                     <div
-                      className={`absolute -bottom-2.5 left-0 right-0 flex items-center justify-center gap-1 pointer-events-none transition-all duration-300 ${isActive
+                      className={`absolute -bottom-2.5 left-0 right-0 flex items-center justify-center gap-1 pointer-events-none transition-all duration-300 ${
+                        isActive
                           ? 'opacity-100 scale-100'
                           : 'opacity-0 scale-95 group-hover:opacity-60 group-hover:scale-100'
-                        }`}
+                      }`}
                     >
                       <span className="h-[1px] w-full bg-[#8B5A2B]/60" />
                       <span className="text-[10px] text-[#8B5A2B] font-bold leading-none select-none">♡</span>
@@ -198,7 +283,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Cart Button */}
             <button
               onClick={onOpenCart}
-              className="relative p-2 rounded-full text-[#3A2A1A] hover:text-[#8B5A2B] hover:bg-[#F2E8DC] transition-colors"
+              className="relative p-2 rounded-full text-[#1E120A] hover:text-[#8B5A2B] hover:bg-[#FAF5EF]/60 transition-colors drop-shadow-xs"
               title="Ver Carrito de Compras"
             >
               <ShoppingBag className="w-5 h-5" />
@@ -218,7 +303,7 @@ export const Header: React.FC<HeaderProps> = ({
                     : () => handleNavClick('admin')
                   : onOpenAuth
               }
-              className="relative w-9 h-9 rounded-full border border-[#D8C5B0] text-[#3A2A1A] hover:text-[#8B5A2B] hover:bg-[#F2E8DC] flex items-center justify-center transition-all shadow-xs"
+              className="relative w-9 h-9 rounded-full border border-[#C8B29B]/60 text-[#1E120A] hover:text-[#8B5A2B] hover:bg-[#FAF5EF]/60 flex items-center justify-center transition-all shadow-xs backdrop-blur-xs drop-shadow-xs"
               title={currentUser ? `Usuario: ${currentUser.name}` : 'Ingresar'}
             >
               <UserIcon className="w-5 h-5" />
@@ -232,7 +317,7 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Mobile Menu Toggle Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 text-[#3A2A1A] hover:text-[#8B5A2B]"
+              className="lg:hidden p-2 text-[#1E120A] hover:text-[#8B5A2B] drop-shadow-xs"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -242,21 +327,101 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden bg-[#FAF5EF] border-b border-[#E8DCCD] px-4 pt-3 pb-6 space-y-3 animate-fadeIn">
+        <div className="lg:hidden bg-[#FAF5EF]/95 backdrop-blur-md border-b border-[#E8DCCD] px-4 pt-3 pb-6 space-y-3 animate-fadeIn shadow-lg">
           <div className="space-y-1">
-            {navItems.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => handleNavClick(item.id)}
-                className={`w-full text-left px-3 py-2 text-sm rounded-md transition-colors flex items-center justify-between ${currentPage === item.id
-                  ? 'bg-[#EAE0D3] text-[#8B5A2B] font-semibold'
-                  : 'text-[#3A2A1A] hover:bg-[#F2E8DC]'
+            {navItems.map((item) => {
+              if (item.id === 'portals') {
+                const isActive = currentPage === 'portals' || currentPage === 'portal-detail';
+                return (
+                  <div key={item.id} className="space-y-1">
+                    <button
+                      onClick={() => setIsMobilePortalsOpen(!isMobilePortalsOpen)}
+                      className={`w-full text-left px-3 py-2 text-sm rounded-md transition-colors flex items-center justify-between cursor-pointer ${
+                        isActive ? 'bg-[#EAE0D3] text-[#8B5A2B] font-semibold' : 'text-[#1E120A] hover:bg-[#F2E8DC]'
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${isMobilePortalsOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    {isMobilePortalsOpen && (
+                      <div className="pl-4 pr-1 py-1 space-y-1 border-l-2 border-[#C8B29B]/50 ml-3">
+                        {portalsList.map((p) => (
+                          <button
+                            key={p.id}
+                            onClick={() => {
+                              onOpenPortalBookModal(p.id);
+                              setIsMobileMenuOpen(false);
+                            }}
+                            className="w-full text-left px-3 py-1.5 text-xs text-[#1E120A] hover:bg-[#F2E8DC] rounded-md transition-colors flex items-center justify-between cursor-pointer"
+                          >
+                            <span>{p.name}</span>
+                            <span className="text-[10px] text-[#A88F76]">→</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              if (item.id === 'letters') {
+                const isActive = currentPage === 'letters' || currentPage === 'community-letters';
+                return (
+                  <div key={item.id} className="space-y-1">
+                    <button
+                      onClick={() => setIsMobileMailboxOpen(!isMobileMailboxOpen)}
+                      className={`w-full text-left px-3 py-2 text-sm rounded-md transition-colors flex items-center justify-between cursor-pointer ${
+                        isActive ? 'bg-[#EAE0D3] text-[#8B5A2B] font-semibold' : 'text-[#1E120A] hover:bg-[#F2E8DC]'
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${isMobileMailboxOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    {isMobileMailboxOpen && (
+                      <div className="pl-4 pr-1 py-1 space-y-1 border-l-2 border-[#C8B29B]/50 ml-3">
+                        <button
+                          onClick={() => handleNavClick('letters')}
+                          className={`w-full text-left px-3 py-1.5 text-xs rounded-md transition-colors flex items-center justify-between cursor-pointer ${
+                            currentPage === 'letters'
+                              ? 'bg-[#EAE0D3] text-[#8B5A2B] font-semibold'
+                              : 'text-[#1E120A] hover:bg-[#F2E8DC]'
+                          }`}
+                        >
+                          <span>Escribir una carta</span>
+                          <span className="text-[10px] text-[#A88F76]">→</span>
+                        </button>
+                        <button
+                          onClick={() => handleNavClick('community-letters')}
+                          className={`w-full text-left px-3 py-1.5 text-xs rounded-md transition-colors flex items-center justify-between cursor-pointer ${
+                            currentPage === 'community-letters'
+                              ? 'bg-[#EAE0D3] text-[#8B5A2B] font-semibold'
+                              : 'text-[#1E120A] hover:bg-[#F2E8DC]'
+                          }`}
+                        >
+                          <span>Leer nuestra comunidad</span>
+                          <span className="text-[10px] text-[#A88F76]">→</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavClick(item.id)}
+                  className={`w-full text-left px-3 py-2 text-sm rounded-md transition-colors flex items-center justify-between cursor-pointer ${
+                    currentPage === item.id
+                      ? 'bg-[#EAE0D3] text-[#8B5A2B] font-semibold'
+                      : 'text-[#1E120A] hover:bg-[#F2E8DC]'
                   }`}
-              >
-                <span>{item.label}</span>
-                {item.badge && <span className="text-[#B35A5A]">{item.badge}</span>}
-              </button>
-            ))}
+                >
+                  <span>{item.label}</span>
+                  {item.badge && <span className="text-[#B35A5A]">{item.badge}</span>}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

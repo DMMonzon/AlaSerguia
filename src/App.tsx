@@ -21,6 +21,7 @@ import { AboutView } from './components/views/AboutView';
 import { StoreView } from './components/views/StoreView';
 import { ServicesView } from './components/views/ServicesView';
 import { LettersView } from './components/views/LettersView';
+import { CommunityLettersView } from './components/views/CommunityLettersView';
 import { ContactView } from './components/views/ContactView';
 import { AdminDashboard } from './components/views/AdminDashboard';
 import { PortalDetailView } from './components/views/PortalDetailView';
@@ -194,6 +195,14 @@ export default function App() {
             letters={letters}
             onAddLetter={handleAddLetter}
             onLikeLetter={handleLikeLetter}
+          />
+        )}
+
+        {currentPage === 'community-letters' && (
+          <CommunityLettersView
+            letters={letters}
+            onLikeLetter={handleLikeLetter}
+            setCurrentPage={setCurrentPage}
           />
         )}
 

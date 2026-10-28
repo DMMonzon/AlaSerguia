@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Product, Portal } from '../types';
 import { X, ArrowRight } from 'lucide-react';
-import portal1Img from '../../assets/img/Portal1_Home.jpeg';
+import portal1Img from '../../assets/img/Portal1_libro.jpeg';
 import iconoEbooks from '../../assets/img/Icono_Ebooks.jpeg';
 import iconoMiniguias from '../../assets/img/Icono_Miniguias.jpeg';
+import iconoVideos from '../../assets/img/Icono_Videos.jpeg';
+import iconoArticulos from '../../assets/img/Icono_Articulos.jpeg';
+import iconoMeditaciones from '../../assets/img/Icono_Meditaciones.jpeg';
 import medallaPortal1 from '../../assets/img/MedallaPortal1.jpeg';
 import medallaPortal2 from '../../assets/img/MedallaPortal2.jpeg';
 import medallaPortal3 from '../../assets/img/MedallaPortal3.jpeg';
@@ -24,35 +27,35 @@ const CATEGORY_ITEMS = [
     key: 'ebooks',
     title: 'Ebooks',
     description: 'Guías para tu crecimiento personal',
-    imgSrc: '../../assets/img/Icono_Ebooks.jpeg',
+    imgSrc: iconoEbooks,
     defaultIcon: 'book',
   },
   {
     key: 'miniguias',
     title: 'Mini Guías',
     description: 'Herramientas prácticas para tu día a día',
-    imgSrc: '../../assets/img/Icono_Miniguias.jpeg',
+    imgSrc: iconoMiniguias,
     defaultIcon: 'jar',
   },
   {
     key: 'videos',
     title: 'Videos',
     description: 'Contenido para inspirar y acompañar',
-    imgSrc: '../../assets/img/Icono_Videos.jpeg',
+    imgSrc: iconoVideos,
     defaultIcon: 'video',
   },
   {
     key: 'articulos',
     title: 'Artículos',
     description: 'Reflexiones y recursos para tu camino',
-    imgSrc: '../../assets/img/Icono_Articulos.jpeg',
+    imgSrc: iconoArticulos,
     defaultIcon: 'article',
   },
   {
     key: 'meditaciones',
     title: 'Próximamente Meditaciones',
     description: 'Para conectar, soltar y renovar tu energía',
-    imgSrc: '../../assets/img/Icono_Meditaciones.jpeg',
+    imgSrc: iconoMeditaciones,
     defaultIcon: 'meditation',
   },
 ];
@@ -151,41 +154,59 @@ export const BookModal: React.FC<BookModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  // Dynamic preview carousel state for Product modal
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+
+  // Compute preview images for product (with fallbacks)
+  const previewImages = useMemo(() => {
+    if (!product) return [];
+    if (product.previewImages && product.previewImages.length > 0) {
+      return product.previewImages;
+    }
+    const pageIllustrations = product.previewPages
+      ?.map((p) => p.illustration)
+      .filter((img): img is string => Boolean(img));
+    if (pageIllustrations && pageIllustrations.length > 0) {
+      return [product.coverImage, ...pageIllustrations];
+    }
+    return [
+      product.coverImage,
+      'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=800',
+    ].filter(Boolean);
+  }, [product]);
+
+  // Reset active image index on product change or modal open
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [product?.id, isOpen]);
+
+  // 3-second automatic cyclic carousel rotation for product preview
+  useEffect(() => {
+    if (!isOpen || !product || previewImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveImageIndex((prev) => (prev + 1) % previewImages.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isOpen, product, previewImages.length]);
+
   if (!isOpen) return null;
 
-  const isProductMode = !!product;
-
-  // Resolved dynamic values with defaults matching reference design
-  const leftPageImage = isProductMode
-    ? product?.coverImage || portal1Img
-    : portal?.illustration || portal1Img;
-
-  const chapterTitleText = isProductMode
-    ? product?.badge || 'VISTA PREVIA DE EBOOK'
-    : portal?.chapterTitle || 'CAPÍTULO I';
-
-  const leftPageMainTitle = isProductMode
-    ? product?.title
-    : portal?.id === 'portal-1' || !portal
-      ? 'El regreso\na vos'
-      : portal.title;
-
-  const leftPageMotto = isProductMode
-    ? product?.description
-    : portal?.chapterMotto || 'Toda transformación comienza cuando decidimos mirar hacia adentro.';
-
-  const rightPageHeaderTitle = isProductMode
-    ? product?.title
-    : portal?.title || 'Energía y Consciencia';
-
-  const rightPageDescription = isProductMode
-    ? product?.description
-    : portal?.description ||
+  // =========================================================================
+  // RESOLVED DATA FOR PORTAL OPEN BOOK SPREAD
+  // =========================================================================
+  const leftPageImage = portal?.illustration || portal1Img;
+  const chapterTitleText = portal?.chapterTitle || 'CAPÍTULO I';
+  const leftPageMainTitle = portal?.id === 'portal-1' || !portal
+    ? 'El regreso\na vos'
+    : portal.title;
+  const leftPageMotto = portal?.chapterMotto || 'Toda transformación comienza cuando decidimos mirar hacia adentro.';
+  const rightPageHeaderTitle = portal?.title || 'Energía y Consciencia';
+  const rightPageDescription = portal?.description ||
     'Un espacio para reconectar con tu energía vital, liberar lo que ya no te pertenece y crear hábitos que te acerquen a la vida que realmente querés vivir.';
 
-  // Resolve header medallion image based on selected portal ID or title
   const activePortalId = portal?.id || 'portal-1';
-  const portalMedallionImage = 
+  const portalMedallionImage =
     activePortalId === 'portal-2' || (portal?.title && portal.title.toLowerCase().includes('luz interior'))
       ? medallaPortal2
       : activePortalId === 'portal-3' || (portal?.title && portal.title.toLowerCase().includes('sofía'))
@@ -195,190 +216,300 @@ export const BookModal: React.FC<BookModalProps> = ({
       : medallaPortal1;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 md:p-10 bg-[#1A1412]/80 backdrop-blur-md animate-fadeIn overflow-y-auto">
-      {/* BOOK OUTER WRAPPER (Open Book structure) */}
-      <div className="relative w-full max-w-5xl my-auto rounded-[24px] sm:rounded-[32px] bg-[#E8DBCC] p-2 sm:p-3.5 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.5)] border-2 border-[#C9B59D]">
-
-        {/* INNER BOOK PAGES FRAME */}
-        <div className="relative w-full rounded-[20px] sm:rounded-[26px] bg-[#FAF5EF] border border-[#D5C2AB] overflow-hidden shadow-inner grid grid-cols-1 md:grid-cols-2">
-
-          {/* CLOSE BUTTON (Floating in upper-right corner of right page) */}
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 md:p-10 bg-[#1A1412]/80 backdrop-blur-md animate-fadeIn overflow-y-auto"
+    >
+      {/* ========================================================================= */}
+      {/* 1. SINGLE-PAGE VERTICAL MODAL (FOR PRODUCTS / RESOURCES)                  */}
+      {/* ========================================================================= */}
+      {product ? (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="relative max-w-md sm:max-w-lg w-full max-h-[90vh] flex flex-col my-auto rounded-3xl border-4 border-[#C8B29B]/70 bg-[#FAF5EF] bg-parchment shadow-2xl p-5 sm:p-7 animate-fadeIn"
+        >
+          {/* Botón de cierre superior derecho (círculo oscuro ocre con cruz) */}
           <button
+            type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 z-30 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#4A5D4E] text-white hover:bg-[#3B4C3E] flex items-center justify-center shadow-lg transition-transform hover:scale-110 focus:outline-none"
-            title="Cerrar libro"
+            className="absolute top-4 right-4 z-30 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#5C4333] hover:bg-[#433024] text-[#FAF5EF] flex items-center justify-center shadow-lg transition-transform hover:scale-110 focus:outline-none cursor-pointer"
+            title="Cerrar modal"
+            aria-label="Cerrar modal"
           >
             <X className="w-5 h-5" />
           </button>
 
-          {/* Pliegue central del libro (Lomo tridimensional suave) */}
-          <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-24 -ml-12 pointer-events-none z-20 bg-gradient-to-r from-transparent via-black/35 to-transparent" />
+          {/* Adornos esquineros botánicos sutiles estilo editorial manuscrito */}
+          <svg className="absolute top-2 left-2 w-16 h-16 text-[#D5C2AB]/40 pointer-events-none" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.2">
+            <path d="M10 10 C35 20, 55 40, 65 70 M10 10 C30 30, 20 50, 35 65" />
+            <path d="M20 15 C25 10, 30 12, 28 18 C22 20, 15 18, 20 15 Z" fill="currentColor" fillOpacity="0.2" />
+          </svg>
+          <svg className="absolute bottom-2 left-2 w-16 h-16 text-[#D5C2AB]/40 pointer-events-none" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.2">
+            <path d="M10 90 C30 70, 40 40, 30 10 M10 90 C20 60, 50 50, 70 40" />
+            <path d="M15 80 C20 75, 25 77, 23 83 C17 85, 10 83, 15 80 Z" fill="currentColor" fillOpacity="0.2" />
+          </svg>
 
-          {/* ==================== LEFT PAGE (FULL COVER ILLUSTRATION) ==================== */}
-          <div className="relative w-full min-h-[480px] sm:min-h-[580px] md:min-h-[640px] flex flex-col justify-between p-6 sm:p-10 md:p-12 text-center select-none overflow-hidden">
-            {/* Background Full Illustration */}
-            <img
-              src={leftPageImage}
-              alt={leftPageMainTitle}
-              className="absolute inset-0 w-full h-full object-cover z-0"
-            />
+          {/* ÁREA DE PREVIEW DINÁMICO (CARRUSEL AUTOMÁTICO CADA 3 SEGUNDOS) */}
+          <div className="relative w-full h-52 sm:h-60 rounded-2xl overflow-hidden border border-[#D8C5B0] shadow-inner bg-[#EAE0D3] shrink-0">
+            {/* Carrusel de imágenes con transición suave fade */}
+            {previewImages.map((imgSrc, idx) => (
+              <img
+                key={idx}
+                src={imgSrc}
+                alt={`${product.title} - Muestra ${idx + 1}`}
+                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out ${
+                  idx === activeImageIndex ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none z-0'
+                }`}
+              />
+            ))}
 
-            {/* Subtle Gradient & Vignette Overlay for High Legibility */}
-            <div className="absolute inset-0 bg-gradient-to-b from-[#1F1915]/65 via-[#1F1915]/30 to-[#1F1915]/75 z-0" />
+            {/* Sombra suave interna degradada para legibilidad */}
+            <div className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-t from-black/45 via-transparent to-black/20" />
 
-            {/* TOP: NÚMERO / ENCABEZADO DE CAPÍTULO */}
-            <div className="relative z-10 space-y-1">
-              <span className="text-[11px] sm:text-xs font-cinzel tracking-[0.25em] text-[#F3EAD8] uppercase drop-shadow">
-                {chapterTitleText}
-              </span>
-              {/* Leaf branch adornment */}
-              <div className="flex items-center justify-center text-[#D4AF37] opacity-90 py-0.5">
-                <svg className="w-10 h-3" viewBox="0 0 60 20" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M5 10 C 20 10, 40 10, 55 10" />
-                  <path d="M20 10 C 17 5, 14 7, 12 10 C 14 13, 17 15, 20 10 Z" fill="currentColor" fillOpacity="0.4" />
-                  <path d="M40 10 C 37 5, 34 7, 32 10 C 34 13, 37 15, 40 10 Z" fill="currentColor" fillOpacity="0.4" />
-                </svg>
-              </div>
-            </div>
-
-            {/* CENTER: TÍTULO PRINCIPAL EN EL CENTRO DE LA PÁGINA */}
-            <div className="relative z-10 max-w-md mx-auto my-auto py-4">
-              <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-[#FFFFFF] font-normal leading-tight tracking-wide drop-shadow-lg whitespace-pre-line">
-                {leftPageMainTitle}
-              </h2>
-            </div>
-
-            {/* BOTTOM: FRASE CONCEPTUAL EN LA PARTE INFERIOR DE LA PÁGINA */}
-            <div className="relative z-10 max-w-md mx-auto space-y-3 pb-2">
-              {/* Star Divider */}
-              <div className="flex items-center justify-center gap-2 text-[#D4AF37] text-xs opacity-80">
-                <span>✦</span>
-              </div>
-
-              {/* Conceptual Subtitle / Phrase */}
-              <p className="font-serif italic text-xs sm:text-sm md:text-base text-[#F5ECE0] leading-relaxed max-w-xs sm:max-w-sm mx-auto drop-shadow">
-                &ldquo;{leftPageMotto}&rdquo;
-              </p>
-
-              {/* Lotus Medallion Adornment */}
-              <div className="pt-1 flex justify-center">
-                <svg className="w-7 h-7 text-[#D4AF37] opacity-95 drop-shadow" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M32 12 C37 22, 42 32, 32 48 C22 32, 27 22, 32 12 Z" fill="#D4AF37" fillOpacity="0.25" />
-                  <path d="M32 24 C44 24, 54 36, 48 48 C38 48, 34 38, 32 24 Z" />
-                  <path d="M32 24 C20 24, 10 36, 16 48 C26 48, 30 38, 32 24 Z" />
-                  <path d="M14 44 C22 52, 42 52, 50 44" />
-                </svg>
-              </div>
+            {/* Indicadores discretos de posición en la parte inferior */}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#1A1412]/50 backdrop-blur-xs border border-[#FAF5EF]/15">
+              {previewImages.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setActiveImageIndex(idx)}
+                  className={`transition-all duration-300 rounded-full cursor-pointer ${
+                    idx === activeImageIndex
+                      ? 'w-4 h-1.5 bg-[#FAF5EF]'
+                      : 'w-1.5 h-1.5 bg-[#FAF5EF]/50 hover:bg-[#FAF5EF]/90'
+                  }`}
+                  aria-label={`Ver muestra ${idx + 1}`}
+                />
+              ))}
             </div>
           </div>
 
-          {/* ==================== RIGHT PAGE (CONTENT & ICON MEDALLIONS) ==================== */}
-          <div className="relative w-full min-h-[480px] sm:min-h-[580px] md:min-h-[640px] bg-[#FAF5EF] p-6 sm:p-10 md:p-12 flex flex-col justify-between bg-parchment overflow-hidden">
+          {/* DETALLES Y ACCIÓN COMERCIAL (DEBAJO DEL PREVIEW) */}
+          <div className="flex flex-col items-center text-center flex-1 min-h-0 pt-3">
+            {/* Categoría / Volanta */}
+            <p className="text-[10px] font-cinzel tracking-widest text-[#A88F76] font-bold uppercase text-center shrink-0">
+              {product.category === 'ebook'
+                ? 'E-BOOK DIGITAL'
+                : product.category === 'guia'
+                ? 'MINI GUÍA ILUSTRADA'
+                : product.category === 'oraculo'
+                ? 'ORÁCULO DIGITAL'
+                : product.category === 'afirmaciones'
+                ? 'SET DE AFIRMACIONES'
+                : product.category}
+            </p>
 
-            {/* BOTANICAL FLORAL CORNER DECORATIONS */}
-            {/* Top Right Floral Line Art */}
-            <svg className="absolute top-2 right-2 w-24 h-24 sm:w-28 sm:h-28 text-[#D5C2AB]/40 pointer-events-none" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.2">
-              <path d="M90 10 C65 20, 45 40, 35 70 M90 10 C70 30, 80 50, 65 65" />
-              <path d="M80 15 C75 10, 70 12, 72 18 C78 20, 85 18, 80 15 Z" fill="currentColor" fillOpacity="0.2" />
-              <path d="M65 25 C60 20, 55 22, 57 28 C63 30, 70 28, 65 25 Z" fill="currentColor" fillOpacity="0.2" />
-            </svg>
+            {/* Título */}
+            <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#382D2B] leading-tight text-center mt-1 px-1 shrink-0">
+              {product.title}
+            </h2>
 
-            {/* Bottom Right Floral Line Art */}
-            <svg className="absolute bottom-2 right-2 w-24 h-24 sm:w-32 sm:h-32 text-[#D5C2AB]/40 pointer-events-none" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.2">
-              <path d="M90 90 C70 70, 60 40, 70 10 M90 90 C80 60, 50 50, 30 40" />
-              <path d="M85 80 C80 75, 75 77, 77 83 C83 85, 90 83, 85 80 Z" fill="currentColor" fillOpacity="0.2" />
-              <path d="M75 60 C70 55, 65 57, 67 63 C73 65, 80 63, 75 60 Z" fill="currentColor" fillOpacity="0.2" />
-            </svg>
+            {/* Divisor sutil en tono ocre */}
+            <div className="flex items-center justify-center gap-2 text-[#C8B29B] my-2 shrink-0">
+              <span className="h-[1px] w-10 bg-[#C8B29B]" />
+              <span className="text-[#8B5A2B] text-xs">✦</span>
+              <span className="h-[1px] w-10 bg-[#C8B29B]" />
+            </div>
 
-            {/* HEADER AREA */}
-            <div className="relative z-10 text-center space-y-3">
-              {/* Featured Portal Medallion Image */}
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-[#D9C4AA] bg-[#FDFBF7] flex items-center justify-center shadow-md mx-auto mb-2 overflow-hidden">
-                <img
-                  src={portalMedallionImage}
-                  alt={rightPageHeaderTitle}
-                  className="w-full h-full object-cover rounded-full"
-                />
-              </div>
-
-              {/* Portal Header Title */}
-              <h3 className="font-serif text-2xl sm:text-3xl text-[#3A2E2B] font-normal tracking-wide">
-                {rightPageHeaderTitle}
-              </h3>
-
-              {/* Star Divider */}
-              <div className="flex items-center justify-center text-[#A88B58] text-xs opacity-70 my-1">
-                <span>✦</span>
-              </div>
-
-              {/* Brief Portal Description */}
-              <p className="font-serif text-xs sm:text-sm text-[#5C4D4B] leading-relaxed max-w-md mx-auto px-2">
-                {rightPageDescription}
+            {/* Bloque de Descripción con scroll vertical exclusivo si el contenido es extenso */}
+            <div
+              className="w-full flex-1 min-h-[44px] max-h-28 sm:max-h-36 overflow-y-auto px-3 py-0.5 my-1"
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#C8B29B transparent',
+              }}
+            >
+              <p className="text-xs sm:text-sm text-[#5C4D4B] font-serif leading-relaxed text-center px-1">
+                {product.description}
               </p>
             </div>
 
-            {/* SECTION SUBTITLE WITH DOUBLE ANGLE QUOTES */}
-            <div className="relative z-10 text-center my-4 sm:my-6">
-              <span className="font-cinzel text-xs sm:text-sm font-semibold tracking-[0.2em] text-[#8B6E4E] uppercase">
-                » ¿QUÉ ENCONTRARÁS AQUÍ? «
-              </span>
-            </div>
+            {/* Bloque de Compra / CTA (Siempre fijado y visible en la parte inferior) */}
+            <div className="w-full mt-2 pt-3 border-t border-[#D8C5B0]/70 flex flex-col items-center shrink-0">
+              {/* Precio destacado en gran tamaño y estilo numérico serif */}
+              <p className="text-xl font-bold text-[#8B5A2B] font-serif text-center mb-2">
+                ${product.price.toLocaleString('es-AR')} <span className="text-xs font-normal text-[#A88F76]">ARS</span>
+              </p>
 
-            {/* 5 CATEGORY ICON MEDALLIONS GRID */}
-            <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 my-2">
-              {CATEGORY_ITEMS.map((item) => (
-                <div key={item.key} className="flex flex-col items-center text-center group cursor-pointer">
-                  {/* Circular Medallion */}
-                  <CategoryIconMedallion item={item} />
-                  {/* Short Bold Title */}
-                  <h4 className="font-serif font-bold text-xs sm:text-sm text-[#382D2B] mb-0.5 leading-tight group-hover:text-[#8B5A2B] transition-colors">
-                    {item.title}
-                  </h4>
-                  {/* Small Description */}
-                  <p className="font-serif text-[10px] sm:text-[11px] text-[#7A6B5D] leading-tight max-w-[120px]">
-                    {item.description}
-                  </p>
+              {/* Botón principal de compra sin precio repetido */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (onAddToCart) onAddToCart(product);
+                  onClose();
+                }}
+                className="w-full py-3 px-6 rounded-full bg-[#8B5A2B] text-white font-serif text-sm font-bold tracking-wider hover:bg-[#6A4320] shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer group"
+              >
+                <span>COMPRAR →</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* ========================================================================= */
+        /* 2. OPEN BOOK TWO-PAGE MODAL (FOR PORTALS)                                 */
+        /* ========================================================================= */
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="relative w-full max-w-5xl my-auto rounded-[24px] sm:rounded-[32px] bg-[#E8DBCC] p-2 sm:p-3.5 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.5)] border-2 border-[#C9B59D]"
+        >
+          {/* INNER BOOK PAGES FRAME */}
+          <div className="relative w-full rounded-[20px] sm:rounded-[26px] bg-[#FAF5EF] border border-[#D5C2AB] overflow-hidden shadow-inner grid grid-cols-1 md:grid-cols-2">
+            {/* CLOSE BUTTON (Floating in upper-right corner of right page) */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="absolute top-4 right-4 z-30 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#4A5D4E] text-white hover:bg-[#3B4C3E] flex items-center justify-center shadow-lg transition-transform hover:scale-110 focus:outline-none cursor-pointer"
+              title="Cerrar libro"
+              aria-label="Cerrar libro"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Pliegue central del libro (Lomo tridimensional suave) */}
+            <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-24 -ml-12 pointer-events-none z-20 bg-gradient-to-r from-transparent via-black/35 to-transparent" />
+
+            {/* ==================== LEFT PAGE (FULL COVER ILLUSTRATION) ==================== */}
+            <div className="relative w-full min-h-[480px] sm:min-h-[580px] md:min-h-[640px] flex flex-col justify-between p-6 sm:p-10 md:p-12 text-center select-none overflow-hidden">
+              {/* Background Full Illustration */}
+              <img
+                src={leftPageImage}
+                alt={leftPageMainTitle}
+                className="absolute inset-0 w-full h-full object-cover z-0"
+              />
+
+              {/* Subtle Gradient & Vignette Overlay for High Legibility */}
+              <div className="absolute inset-0 bg-gradient-to-b from-[#1F1915]/65 via-[#1F1915]/30 to-[#1F1915]/75 z-0" />
+
+              {/* TOP: NÚMERO / ENCABEZADO DE CAPÍTULO */}
+              <div className="relative z-10 space-y-1">
+                <span className="text-[11px] sm:text-xs font-cinzel tracking-[0.25em] text-[#F3EAD8] uppercase drop-shadow">
+                  {chapterTitleText}
+                </span>
+                {/* Leaf branch adornment */}
+                <div className="flex items-center justify-center text-[#D4AF37] opacity-90 py-0.5">
+                  <svg className="w-10 h-3" viewBox="0 0 60 20" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M5 10 C 20 10, 40 10, 55 10" />
+                    <path d="M20 10 C 17 5, 14 7, 12 10 C 14 13, 17 15, 20 10 Z" fill="currentColor" fillOpacity="0.4" />
+                    <path d="M40 10 C 37 5, 34 7, 32 10 C 34 13, 37 15, 40 10 Z" fill="currentColor" fillOpacity="0.4" />
+                  </svg>
                 </div>
-              ))}
+              </div>
+
+              {/* CENTER: TÍTULO PRINCIPAL EN EL CENTRO DE LA PÁGINA */}
+              <div className="relative z-10 max-w-md mx-auto my-auto py-4">
+                <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl text-[#FFFFFF] font-normal leading-tight tracking-wide drop-shadow-lg whitespace-pre-line">
+                  {leftPageMainTitle}
+                </h2>
+              </div>
+
+              {/* BOTTOM: FRASE CONCEPTUAL EN LA PARTE INFERIOR DE LA PÁGINA */}
+              <div className="relative z-10 max-w-md mx-auto space-y-3 pb-2">
+                {/* Star Divider */}
+                <div className="flex items-center justify-center gap-2 text-[#D4AF37] text-xs opacity-80">
+                  <span>✦</span>
+                </div>
+
+                {/* Conceptual Subtitle / Phrase */}
+                <p className="font-serif italic text-xs sm:text-sm md:text-base text-[#F5ECE0] leading-relaxed max-w-xs sm:max-w-sm mx-auto drop-shadow">
+                  &ldquo;{leftPageMotto}&rdquo;
+                </p>
+
+                {/* Lotus Medallion Adornment */}
+                <div className="pt-1 flex justify-center">
+                  <svg className="w-7 h-7 text-[#D4AF37] opacity-95 drop-shadow" viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M32 12 C37 22, 42 32, 32 48 C22 32, 27 22, 32 12 Z" fill="#D4AF37" fillOpacity="0.25" />
+                    <path d="M32 24 C44 24, 54 36, 48 48 C38 48, 34 38, 32 24 Z" />
+                    <path d="M32 24 C20 24, 10 36, 16 48 C26 48, 30 38, 32 24 Z" />
+                    <path d="M14 44 C22 52, 42 52, 50 44" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
-            {/* CALL TO ACTION BUTTON (BOTTOM CENTER) */}
-            <div className="relative z-10 pt-4 sm:pt-6 text-center">
-              {isProductMode && product && onAddToCart ? (
+            {/* ==================== RIGHT PAGE (CONTENT & ICON MEDALLIONS) ==================== */}
+            <div className="relative w-full min-h-[480px] sm:min-h-[580px] md:min-h-[640px] bg-[#FAF5EF] p-6 sm:p-10 md:p-12 flex flex-col justify-between bg-parchment overflow-hidden">
+              {/* BOTANICAL FLORAL CORNER DECORATIONS */}
+              <svg className="absolute top-2 right-2 w-24 h-24 sm:w-28 sm:h-28 text-[#D5C2AB]/40 pointer-events-none" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.2">
+                <path d="M90 10 C65 20, 45 40, 35 70 M90 10 C70 30, 80 50, 65 65" />
+                <path d="M80 15 C75 10, 70 12, 72 18 C78 20, 85 18, 80 15 Z" fill="currentColor" fillOpacity="0.2" />
+                <path d="M65 25 C60 20, 55 22, 57 28 C63 30, 70 28, 65 25 Z" fill="currentColor" fillOpacity="0.2" />
+              </svg>
+
+              <svg className="absolute bottom-2 right-2 w-24 h-24 sm:w-32 sm:h-32 text-[#D5C2AB]/40 pointer-events-none" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.2">
+                <path d="M90 90 C70 70, 60 40, 70 10 M90 90 C80 60, 50 50, 30 40" />
+                <path d="M85 80 C80 75, 75 77, 77 83 C83 85, 90 83, 85 80 Z" fill="currentColor" fillOpacity="0.2" />
+                <path d="M75 60 C70 55, 65 57, 67 63 C73 65, 80 63, 75 60 Z" fill="currentColor" fillOpacity="0.2" />
+              </svg>
+
+              {/* HEADER AREA */}
+              <div className="relative z-10 text-center space-y-3">
+                {/* Featured Portal Medallion Image */}
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-[#D9C4AA] bg-[#FDFBF7] flex items-center justify-center shadow-md mx-auto mb-2 overflow-hidden">
+                  <img
+                    src={portalMedallionImage}
+                    alt={rightPageHeaderTitle}
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                </div>
+
+                {/* Portal Header Title */}
+                <h3 className="font-serif text-2xl sm:text-3xl text-[#3A2E2B] font-normal tracking-wide">
+                  {rightPageHeaderTitle}
+                </h3>
+
+                {/* Star Divider */}
+                <div className="flex items-center justify-center text-[#A88B58] text-xs opacity-70 my-1">
+                  <span>✦</span>
+                </div>
+
+                {/* Brief Portal Description */}
+                <p className="font-serif text-xs sm:text-sm text-[#5C4D4B] leading-relaxed max-w-md mx-auto px-2">
+                  {rightPageDescription}
+                </p>
+              </div>
+
+              {/* SECTION SUBTITLE WITH DOUBLE ANGLE QUOTES */}
+              <div className="relative z-10 text-center my-4 sm:my-6">
+                <span className="font-cinzel text-xs sm:text-sm font-semibold tracking-[0.2em] text-[#8B6E4E] uppercase">
+                  » ¿QUÉ ENCONTRARÁS AQUÍ? «
+                </span>
+              </div>
+
+              {/* 5 CATEGORY ICON MEDALLIONS GRID */}
+              <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4 my-2">
+                {CATEGORY_ITEMS.map((item) => (
+                  <div key={item.key} className="flex flex-col items-center text-center group cursor-pointer">
+                    <CategoryIconMedallion item={item} />
+                    <h4 className="font-serif font-bold text-xs sm:text-sm text-[#382D2B] mb-0.5 leading-tight group-hover:text-[#8B5A2B] transition-colors">
+                      {item.title}
+                    </h4>
+                    <p className="font-serif text-[10px] sm:text-[11px] text-[#7A6B5D] leading-tight max-w-[120px]">
+                      {item.description}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {/* CALL TO ACTION BUTTON (BOTTOM CENTER) */}
+              <div className="relative z-10 pt-4 sm:pt-6 text-center">
                 <button
-                  onClick={() => {
-                    onAddToCart(product);
-                    onClose();
-                  }}
-                  className="w-full max-w-sm mx-auto py-3 sm:py-3.5 px-6 rounded-full bg-[#4A5D4E] hover:bg-[#3C4A3E] text-white text-xs sm:text-sm font-bold tracking-widest uppercase transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group cursor-pointer"
-                >
-                  <span>ADQUIRIR EBOOK (${product.price.toLocaleString('es-AR')})</span>
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </button>
-              ) : (
-                <button
+                  type="button"
                   onClick={() => {
                     if (portal && onSelectPortal) {
                       onSelectPortal(portal);
-                    } else if (onSelectPortal) {
-                      // Fallback if portal is null
                     }
                     onClose();
                   }}
-                  className="w-full max-w-sm mx-auto py-3 sm:py-3.5 px-6 rounded-full bg-[#4A5D4E] hover:bg-[#3C4A3E] text-white text-xs sm:text-sm font-bold tracking-widest uppercase transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group cursor-pointer"
+                  className="w-full max-w-sm mx-auto py-3 sm:py-3.5 px-6 rounded-full bg-[#4A5D4E] hover:bg-[#3C4A3E] text-white text-xs sm:text-sm font-bold tracking-widest uppercase transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center cursor-pointer"
                 >
-                  <span>EXPLORAR ESTE PORTAL</span>
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  EXPLORAR ESTE PORTAL
                 </button>
-              )}
+              </div>
             </div>
-
           </div>
-
         </div>
-
-      </div>
+      )}
     </div>
   );
 };
-

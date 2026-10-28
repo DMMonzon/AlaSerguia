@@ -19,7 +19,7 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentPage, onOpenBookModal 
   };
 
   return (
-    <footer className="relative z-20 w-full bg-[#FAF5EF] text-[#4A3E3D] border-t border-[#D8C5B0] pt-12 pb-8 shadow-2xl">
+    <footer className="relative z-20 w-full bg-[#FAF5EF] text-[#4A3E3D] border-t-2 border-[#8B5A2B]/35 pt-12 pb-8 shadow-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Links Grid */}
@@ -64,7 +64,8 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentPage, onOpenBookModal 
               <li><button onClick={() => handleNav('portals')} className="hover:text-[#8B5A2B] transition-colors">Portales de Luz</button></li>
               <li><button onClick={() => handleNav('store')} className="hover:text-[#8B5A2B] transition-colors">Tienda & E-books</button></li>
               <li><button onClick={() => handleNav('services')} className="hover:text-[#8B5A2B] transition-colors">Acompañamiento & Sesiones</button></li>
-              <li><button onClick={() => handleNav('letters')} className="hover:text-[#8B5A2B] transition-colors">Buzón de Cartas ♡</button></li>
+              <li><button onClick={() => handleNav('letters')} className="hover:text-[#8B5A2B] transition-colors">Buzón: Escribir carta</button></li>
+              <li><button onClick={() => handleNav('community-letters')} className="hover:text-[#8B5A2B] transition-colors">Buzón: Leer la comunidad</button></li>
             </ul>
           </div>
 

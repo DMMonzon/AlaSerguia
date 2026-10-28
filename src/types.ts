@@ -6,6 +6,7 @@ export type PageView =
   | 'store'
   | 'services'
   | 'letters'
+  | 'community-letters'
   | 'contact'
   | 'admin';
 
@@ -37,6 +38,7 @@ export interface Product {
     illustration?: string;
   }[];
   downloadUrl?: string;
+  previewImages?: string[];
 }
 
 export interface Portal {

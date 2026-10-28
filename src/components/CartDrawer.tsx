@@ -207,10 +207,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-xl bg-[#8B5A2B] text-white text-xs font-bold tracking-wider hover:bg-[#6A4320] shadow-md transition-all flex items-center justify-center gap-2"
+                  className="w-full py-3 rounded-xl bg-[#8B5A2B] text-white text-xs font-bold tracking-wider hover:bg-[#6A4320] shadow-md transition-all flex items-center justify-center cursor-pointer"
                 >
-                  <CreditCard className="w-4 h-4" />
-                  Confirmar y Finalizar Compra
+                  CONFIRMAR Y FINALIZAR COMPRA
                 </button>
 
                 <button
@@ -268,9 +267,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
                 <button
                   onClick={handleFinish}
-                  className="w-full py-2.5 rounded-xl bg-[#4A3E3D] text-white text-xs font-bold tracking-wider hover:bg-[#382D2B]"
+                  className="w-full py-2.5 rounded-xl bg-[#4A3E3D] text-white text-xs font-bold tracking-wider hover:bg-[#382D2B] cursor-pointer"
                 >
-                  Cerrar y Volver al Inicio
+                  CERRAR Y VOLVER AL INICIO
                 </button>
               </div>
             )}
@@ -288,10 +287,9 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
               </div>
               <button
                 onClick={handleStartCheckout}
-                className="w-full py-3 rounded-xl bg-[#8B5A2B] text-white text-xs font-bold tracking-wider hover:bg-[#6A4320] shadow-md transition-all flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-xl bg-[#8B5A2B] text-white text-xs font-bold tracking-wider hover:bg-[#6A4320] shadow-md transition-all flex items-center justify-center cursor-pointer"
               >
-                Iniciar Pago / Descarga
-                <ArrowRight className="w-4 h-4" />
+                INICIAR PAGO / DESCARGA
               </button>
             </div>
           )}

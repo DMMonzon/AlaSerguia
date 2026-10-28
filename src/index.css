@@ -20,6 +20,8 @@
   :root {
     --font-serif: '29LT Riwaya Informal', serif;
     --font-display: 'Simonetta', serif;
+    --font-cursive: 'Alex Brush', cursive;
+    --font-handwritten: 'Caveat', cursive, serif;
   }
 
   body,
@@ -27,9 +29,17 @@
   input,
   select,
   textarea,
-  .font-serif,
-  .font-handwriting {
+  .font-serif {
     font-family: var(--font-serif);
+  }
+
+  .font-cursive {
+    font-family: var(--font-cursive);
+  }
+
+  .font-handwritten,
+  .font-handwriting {
+    font-family: var(--font-handwritten);
   }
 
   h1,
