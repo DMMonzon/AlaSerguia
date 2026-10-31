@@ -3,9 +3,9 @@ import portal1Img from '../../assets/img/Portal1_libro.jpeg';
 import portal2Img from '../../assets/img/Portal2_libro.jpeg';
 import portal3Img from '../../assets/img/Portal3_libro.jpeg';
 import portal4Img from '../../assets/img/Portal4_libro.jpeg';
-import tarotImg from '../../assets/img/Tarot.jpeg';
-import reikiImg from '../../assets/img/Reiki.jpeg';
-import registrosImg from '../../assets/img/Registros.jpeg';
+import tarotImg from '../../assets/img/Tarot.png';
+import reikiImg from '../../assets/img/Reiki.png';
+import registrosImg from '../../assets/img/Registros.png';
 
 export const INITIAL_PRODUCTS: Product[] = [
   {

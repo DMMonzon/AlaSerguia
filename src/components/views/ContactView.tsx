@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Send, CheckCircle2, MapPin, Clock, HelpCircle, Sparkles } from 'lucide-react';
 import { AntiqueBookDivider } from '../AntiqueBookDivider';
-import portal3HomeImg from '../../../assets/img/Portal3_Home.jpeg';
+import contactoHeroImg from '../../../assets/img/ContactoHero.jpeg';
 
 export const ContactView: React.FC = () => {
   const [scrollY, setScrollY] = useState(0);
@@ -51,7 +51,7 @@ export const ContactView: React.FC = () => {
       {/* CAPA DE FONDO ESTÁTICA CON BLUR GRADUAL Y LENTO EN SCROLL */}
       <div className="fixed inset-0 w-full h-[100dvh] pointer-events-none z-0 overflow-hidden">
         <img
-          src={portal3HomeImg}
+          src={contactoHeroImg}
           alt="Contacto Hero"
           className="w-full h-full object-cover object-center will-change-transform"
           style={{

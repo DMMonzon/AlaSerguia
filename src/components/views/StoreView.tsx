@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Product } from '../../types';
 import { ShoppingBag, Eye, Download, Sparkles, CheckCircle2 } from 'lucide-react';
 import { AntiqueBookDivider } from '../AntiqueBookDivider';
-import storeHeroImg from '../../../assets/img/Portal1_Home.jpeg';
+import storeHeroImg from '../../../assets/img/TiendaHero.jpeg';
 
 interface StoreViewProps {
   products: Product[];

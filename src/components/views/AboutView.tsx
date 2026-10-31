@@ -3,6 +3,9 @@ import { PageView } from '../../types';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { AntiqueBookDivider } from '../AntiqueBookDivider';
 import logoImg from '../../../assets/img/Logo.jpeg';
+import alaImg from '../../../assets/img/Ala.png';
+import serImg from '../../../assets/img/Ser.png';
+import guiaImg from '../../../assets/img/Guia.png';
 
 interface AboutViewProps {
   setCurrentPage: (page: PageView) => void;
@@ -28,17 +31,17 @@ export const AboutView: React.FC<AboutViewProps> = ({ setCurrentPage }) => {
     {
       title: 'Ala',
       meaning: 'Representa aquello que nos sostiene aunque no siempre podamos verlo. La espiritualidad, la intuición y la conexión que nos guía en cada paso.',
-      illustration: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&q=80&w=400'
+      illustration: alaImg
     },
     {
       title: 'Ser',
       meaning: 'Nuestra esencia, nuestra autenticidad. El permiso para ser quienes realmente somos y honrar nuestra luz única en el mundo.',
-      illustration: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=400'
+      illustration: serImg
     },
     {
       title: 'Guía',
       meaning: 'El acompañamiento en el camino, la certeza de que nadie tiene que recorrer su historia en soledad.',
-      illustration: 'https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&q=80&w=400'
+      illustration: guiaImg
     }
   ];
 
@@ -171,17 +174,17 @@ export const AboutView: React.FC<AboutViewProps> = ({ setCurrentPage }) => {
               {nameBreakdown.map((item, idx) => (
                 <div
                   key={idx}
-                  className="bg-[#FAF5EF]/90 rounded-2xl border-2 border-[#E2D5C5] overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-row items-stretch min-h-[150px]"
+                  className="bg-[#FAF5EF]/90 rounded-2xl border-2 border-[#E2D5C5] overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-row items-stretch min-h-[150px] group"
                 >
-                  <div className="w-1/3 min-w-[120px] relative shrink-0 border-r-2 border-[#E2D5C5] overflow-hidden">
+                  <div className="w-1/3 min-w-[110px] max-w-[130px] p-2.5 flex items-center justify-center shrink-0 border-r-2 border-[#E2D5C5] bg-[#F4EBE1]/40">
                     <img
                       src={item.illustration}
                       alt={item.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full max-h-[120px] object-contain drop-shadow-xs group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
 
-                  <div className="p-5 sm:p-6 flex flex-col justify-center space-y-1.5 text-left flex-1">
+                  <div className="p-4 sm:p-5 flex flex-col justify-center space-y-1.5 text-left flex-1">
                     <h3 className="font-serif text-2xl font-bold text-[#382D2B]">
                       {item.title}
                     </h3>

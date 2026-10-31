@@ -3,9 +3,9 @@ import { PageView, SessionService } from '../../types';
 import { Sparkles, ArrowRight, CheckCircle2, X, Eye } from 'lucide-react';
 import { AntiqueBookDivider } from '../AntiqueBookDivider';
 import portal4HomeImg from '../../../assets/img/Portal4_Home.jpeg';
-import tarotImg from '../../../assets/img/Tarot.jpeg';
-import reikiImg from '../../../assets/img/Reiki.jpeg';
-import registrosImg from '../../../assets/img/Registros.jpeg';
+import tarotImg from '../../../assets/img/Tarot.png';
+import reikiImg from '../../../assets/img/Reiki.png';
+import registrosImg from '../../../assets/img/Registros.png';
 
 const getSessionImage = (session: SessionService) => {
   if (session.id === 'sess-tarot' || session.title.toLowerCase().includes('tarot')) {
@@ -167,8 +167,12 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ sessions, setCurrent
                   className="bg-[#FAF5EF]/90 rounded-2xl border-2 border-[#E2D5C5] p-6 sm:p-7 space-y-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
                 >
                   <div className="space-y-4">
-                    <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-[#C8B29B] shadow-inner group-hover:scale-105 transition-transform duration-300">
-                      <img src={getSessionImage(sess)} alt={sess.title} className="w-full h-full object-cover" />
+                    <div className="h-32 sm:h-36 w-full flex items-center justify-center mx-auto group-hover:scale-105 transition-transform duration-300">
+                      <img
+                        src={getSessionImage(sess)}
+                        alt={sess.title}
+                        className="max-h-full max-w-[200px] sm:max-w-[220px] w-auto h-auto object-contain drop-shadow-sm"
+                      />
                     </div>
 
                     <div className="text-center space-y-1">
@@ -407,8 +411,12 @@ export const ServicesView: React.FC<ServicesViewProps> = ({ sessions, setCurrent
             </button>
 
             <div className="text-center space-y-3">
-              <div className="w-20 h-20 mx-auto rounded-full overflow-hidden border-2 border-[#C8B29B] shadow-inner">
-                <img src={getSessionImage(detailSession)} alt={detailSession.title} className="w-full h-full object-cover" />
+              <div className="h-32 sm:h-36 w-full flex items-center justify-center mx-auto">
+                <img
+                  src={getSessionImage(detailSession)}
+                  alt={detailSession.title}
+                  className="max-h-full max-w-[200px] sm:max-w-[220px] w-auto h-auto object-contain drop-shadow-sm"
+                />
               </div>
 
               <div>

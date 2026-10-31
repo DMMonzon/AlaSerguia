@@ -8,7 +8,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { AntiqueBookDivider } from '../AntiqueBookDivider';
-import correoHeroImg from '../../../assets/img/CorreoHero.jpeg';
+import cartasCompartidasHeroImg from '../../../assets/img/CartascompartidasHero.jpeg';
 
 interface CommunityLettersViewProps {
   letters: Letter[];
@@ -63,7 +63,7 @@ export const CommunityLettersView: React.FC<CommunityLettersViewProps> = ({
       {/* CAPA DE FONDO ESTÁTICA CON BLUR GRADUAL Y LENTO EN SCROLL */}
       <div className="fixed inset-0 w-full h-[100dvh] pointer-events-none z-0 overflow-hidden">
         <img
-          src={correoHeroImg}
+          src={cartasCompartidasHeroImg}
           alt="Cartas de la comunidad"
           className="w-full h-full object-cover object-center will-change-transform"
           style={{
